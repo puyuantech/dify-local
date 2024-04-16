@@ -4,9 +4,15 @@ label:
 description:
   en_US: ModelHub
   zh_Hans: ModelHub
+icon_small:
+  en_US: icon_s_en.svg
+icon_large:
+  en_US: icon_l_en.svg
+background: "#FFFFFF"
 supported_model_types:
   - llm
   - text-embedding
+  - rerank
 configurate_methods:
   - predefined-model
   - customizable-model
