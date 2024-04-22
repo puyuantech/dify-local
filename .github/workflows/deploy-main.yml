@@ -1,9 +1,9 @@
-name: Deploy Dev
+name: Deploy Main
 
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   deploy:
@@ -16,4 +16,4 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            ${{ secrets.SSH_DEV_SCRIPT }}
+            ${{ secrets.SSH_MAIN_SCRIPT }}
