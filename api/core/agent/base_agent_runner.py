@@ -1,10 +1,11 @@
 import json
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Union, cast
 
 from core.agent.entities import AgentEntity, AgentToolEntity
+from core.app.app_config.features.file_upload.manager import FileUploadConfigManager
 from core.app.apps.agent_chat.app_config_manager import AgentChatAppConfig
 from core.app.apps.base_app_queue_manager import AppQueueManager
 from core.app.apps.base_app_runner import AppRunner
@@ -14,6 +15,7 @@ from core.app.entities.app_invoke_entities import (
 )
 from core.callback_handler.agent_tool_callback_handler import DifyAgentCallbackHandler
 from core.callback_handler.index_tool_callback_handler import DatasetIndexToolCallbackHandler
+from core.file.message_file_parser import MessageFileParser
 from core.memory.token_buffer_memory import TokenBufferMemory
 from core.model_manager import ModelInstance
 from core.model_runtime.entities.llm_entities import LLMUsage
@@ -22,6 +24,7 @@ from core.model_runtime.entities.message_entities import (
     PromptMessage,
     PromptMessageTool,
     SystemPromptMessage,
+    TextPromptMessageContent,
     ToolPromptMessage,
     UserPromptMessage,
 )
@@ -37,7 +40,7 @@ from core.tools.tool.dataset_retriever_tool import DatasetRetrieverTool
 from core.tools.tool.tool import Tool
 from core.tools.tool_manager import ToolManager
 from extensions.ext_database import db
-from models.model import Message, MessageAgentThought
+from models.model import Conversation, Message, MessageAgentThought
 from models.tools import ToolConversationVariables
 
 logger = logging.getLogger(__name__)
@@ -45,6 +48,7 @@ logger = logging.getLogger(__name__)
 class BaseAgentRunner(AppRunner):
     def __init__(self, tenant_id: str,
                  application_generate_entity: AgentChatAppGenerateEntity,
+                 conversation: Conversation,
                  app_config: AgentChatAppConfig,
                  model_config: ModelConfigWithCredentialsEntity,
                  config: AgentEntity,
@@ -72,6 +76,7 @@ class BaseAgentRunner(AppRunner):
         """
         self.tenant_id = tenant_id
         self.application_generate_entity = application_generate_entity
+        self.conversation = conversation
         self.app_config = app_config
         self.model_config = model_config
         self.config = config
@@ -117,6 +122,12 @@ class BaseAgentRunner(AppRunner):
             self.stream_tool_call = True
         else:
             self.stream_tool_call = False
+
+        # check if model supports vision
+        if model_schema and ModelFeature.VISION in (model_schema.features or []):
+            self.files = application_generate_entity.files
+        else:
+            self.files = []
 
     def _repack_app_generate_entity(self, app_generate_entity: AgentChatAppGenerateEntity) \
             -> AgentChatAppGenerateEntity:
@@ -227,6 +238,34 @@ class BaseAgentRunner(AppRunner):
 
         return prompt_tool
     
+    def _init_prompt_tools(self) -> tuple[dict[str, Tool], list[PromptMessageTool]]:
+        """
+        Init tools
+        """
+        tool_instances = {}
+        prompt_messages_tools = []
+
+        for tool in self.app_config.agent.tools if self.app_config.agent else []:
+            try:
+                prompt_tool, tool_entity = self._convert_tool_to_prompt_message_tool(tool)
+            except Exception:
+                # api tool may be deleted
+                continue
+            # save tool entity
+            tool_instances[tool.tool_name] = tool_entity
+            # save prompt tool
+            prompt_messages_tools.append(prompt_tool)
+
+        # convert dataset tools into ModelRuntime Tool format
+        for dataset_tool in self.dataset_tools:
+            prompt_tool = self._convert_dataset_retriever_tool_to_prompt_message_tool(dataset_tool)
+            # save prompt tool
+            prompt_messages_tools.append(prompt_tool)
+            # save tool entity
+            tool_instances[dataset_tool.identity.name] = dataset_tool
+
+        return tool_instances, prompt_messages_tools
+
     def update_prompt_message_tool(self, tool: Tool, prompt_tool: PromptMessageTool) -> PromptMessageTool:
         """
         update prompt message tool
@@ -314,7 +353,7 @@ class BaseAgentRunner(AppRunner):
                            tool_name: str,
                            tool_input: Union[str, dict],
                            thought: str, 
-                           observation: Union[str, str], 
+                           observation: Union[str, dict], 
                            tool_invoke_meta: Union[str, dict],
                            answer: str,
                            messages_ids: list[str],
@@ -401,7 +440,7 @@ class BaseAgentRunner(AppRunner):
             ToolConversationVariables.conversation_id == self.message.conversation_id,
         ).first()
 
-        db_variables.updated_at = datetime.utcnow()
+        db_variables.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
         db_variables.variables_str = json.dumps(jsonable_encoder(tool_variables.pool))
         db.session.commit()
         db.session.close()
@@ -412,15 +451,19 @@ class BaseAgentRunner(AppRunner):
         """
         result = []
         # check if there is a system message in the beginning of the conversation
-        if prompt_messages and isinstance(prompt_messages[0], SystemPromptMessage):
-            result.append(prompt_messages[0])
+        for prompt_message in prompt_messages:
+            if isinstance(prompt_message, SystemPromptMessage):
+                result.append(prompt_message)
 
         messages: list[Message] = db.session.query(Message).filter(
             Message.conversation_id == self.message.conversation_id,
         ).order_by(Message.created_at.asc()).all()
 
         for message in messages:
-            result.append(UserPromptMessage(content=message.query))
+            if message.id == self.message.id:
+                continue
+            
+            result.append(self.organize_agent_user_prompt(message))
             agent_thoughts: list[MessageAgentThought] = message.agent_thoughts
             if agent_thoughts:
                 for agent_thought in agent_thoughts:
@@ -471,3 +514,32 @@ class BaseAgentRunner(AppRunner):
         db.session.close()
 
         return result
+
+    def organize_agent_user_prompt(self, message: Message) -> UserPromptMessage:
+        message_file_parser = MessageFileParser(
+            tenant_id=self.tenant_id,
+            app_id=self.app_config.app_id,
+        )
+
+        files = message.message_files
+        if files:
+            file_extra_config = FileUploadConfigManager.convert(message.app_model_config.to_dict())
+
+            if file_extra_config:
+                file_objs = message_file_parser.transform_message_files(
+                    files,
+                    file_extra_config
+                )
+            else:
+                file_objs = []
+
+            if not file_objs:
+                return UserPromptMessage(content=message.query)
+            else:
+                prompt_message_contents = [TextPromptMessageContent(data=message.query)]
+                for file_obj in file_objs:
+                    prompt_message_contents.append(file_obj.prompt_message_content)
+
+                return UserPromptMessage(content=prompt_message_contents)
+        else:
+            return UserPromptMessage(content=message.query)

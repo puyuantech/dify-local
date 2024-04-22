@@ -1,11 +1,11 @@
 {
   "name": "dify-web",
-  "version": "0.6.0",
+  "version": "0.6.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public && cross-env PORT=$npm_config_port HOSTNAME=$npm_config_host node .next/standalone/server.js",
+    "start": "cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public && cross-env PORT=4544 HOSTNAME=127.0.0.1 node .next/standalone/server.js",
     "lint": "next lint",
     "fix": "next lint --fix",
     "eslint-fix": "eslint --fix",
@@ -44,7 +44,7 @@
     "immer": "^9.0.19",
     "js-audio-recorder": "^1.0.7",
     "js-cookie": "^3.0.1",
-    "katex": "^0.16.7",
+    "katex": "^0.16.10",
     "lamejs": "^1.2.1",
     "lexical": "^0.12.2",
     "lodash-es": "^4.17.21",

@@ -1,3 +1,5 @@
+- modelhub
+- openai_api_compatible
 - openai
 - anthropic
 - azure_openai
@@ -26,4 +28,3 @@
 - yi
 - openllm
 - localai
-- openai_api_compatible

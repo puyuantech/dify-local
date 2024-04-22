@@ -1,0 +1,21 @@
+model: glm-3-turbo
+label:
+  zh_Hans: glm-3-turbo
+  en_US: glm-3-turbo
+model_type: llm
+features:
+  - multi-tool-call
+  - agent-thought
+  - stream-tool-call
+model_properties:
+  mode: chat
+  context_size: 8192
+parameter_rules:
+  - name: temperature
+    use_template: temperature
+    default: 0.01
+pricing:
+  input: "0.003"
+  output: "0.004"
+  unit: "0.001"
+  currency: USD
