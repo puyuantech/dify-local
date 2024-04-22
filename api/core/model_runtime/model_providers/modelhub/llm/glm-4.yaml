@@ -1,0 +1,21 @@
+model: glm-4
+label:
+  zh_Hans: glm-4
+  en_US: glm-4
+model_type: llm
+features:
+  - multi-tool-call
+  - agent-thought
+  - stream-tool-call
+model_properties:
+  mode: chat
+  context_size: 8192
+parameter_rules:
+  - name: temperature
+    use_template: temperature
+    default: 0.01
+pricing:
+  input: "0.003"
+  output: "0.004"
+  unit: "0.001"
+  currency: USD
