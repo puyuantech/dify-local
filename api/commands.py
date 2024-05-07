@@ -24,13 +24,19 @@ from models.model import (
     MessageAnnotation,
 )
 from models.provider import Provider, ProviderModel
-from services.account_service import RegisterService
+from services.account_service import RegisterService, TenantService
 
 
 @click.command("register", help="Register a new accout")
-@click.option("--email", prompt=True, help="The email address of the account you want to register")
-@click.option("--name", prompt=True, help="The name of the account you want to register")
-@click.option("--password", prompt=True, help="The password of the account you want to register")
+@click.option(
+    "--email", prompt=True, help="The email address of the account you want to register"
+)
+@click.option(
+    "--name", prompt=True, help="The name of the account you want to register"
+)
+@click.option(
+    "--password", prompt=True, help="The password of the account you want to register"
+)
 def register(email, name, password):
     """
     Register a new accout
@@ -38,23 +44,73 @@ def register(email, name, password):
     try:
         email_validate(email)
     except:
-        click.echo(click.style("sorry. {} is not a valid email. ".format(email), fg="red"))
+        click.echo(
+            click.style("sorry. {} is not a valid email. ".format(email), fg="red")
+        )
         return
 
     try:
         valid_password(password)
     except:
-        click.echo(click.style("sorry. The passwords must match {} ".format(password_pattern), fg="red"))
+        click.echo(
+            click.style(
+                "sorry. The passwords must match {} ".format(password_pattern), fg="red"
+            )
+        )
         return
 
     account = db.session.query(Account).filter(Account.email == email).one_or_none()
 
     if account:
-        click.echo(click.style("sorry. the account: [{}] already exists .".format(email), fg="red"))
+        click.echo(
+            click.style(
+                "sorry. the account: [{}] already exists .".format(email), fg="red"
+            )
+        )
         return
 
     account = RegisterService.register(email, name, password)
-    click.echo(click.style("Congratulations!, account has been registered.", fg="green"))
+    click.echo(
+        click.style("Congratulations!, account has been registered.", fg="green")
+    )
+
+
+@click.command("create-workspace", help="Create a workspace")
+@click.option(
+    "--email",
+    prompt=True,
+    help="The email address of the account you want to create workspace",
+)
+def create_workspace(email):
+    """
+    Create a workspace
+    """
+    account = db.session.query(Account).filter(Account.email == email).one_or_none()
+
+    if not account:
+        click.echo(
+            click.style("sorry. the account: [{}] not exist .".format(email), fg="red")
+        )
+        return
+
+    tenants = TenantService.get_join_tenants(account)
+
+    if tenants:
+        click.echo(
+            click.style(
+                "sorry. the account: [{}] already has workspace .".format(email),
+                fg="red",
+            )
+        )
+        return
+
+    tenant = TenantService.create_tenant(f"{account.name}'s Workspace")
+
+    TenantService.create_tenant_member(tenant, account, role="owner")
+    account.current_tenant = tenant
+    db.session.commit()
+
+    click.echo(click.style("Congratulations!, workspace has been created.", fg="green"))
 
 
 @click.command("reset-password", help="Reset the account password.")
@@ -77,13 +133,19 @@ def reset_password(email, new_password, password_confirm):
     account = db.session.query(Account).filter(Account.email == email).one_or_none()
 
     if not account:
-        click.echo(click.style("sorry. the account: [{}] not exist .".format(email), fg="red"))
+        click.echo(
+            click.style("sorry. the account: [{}] not exist .".format(email), fg="red")
+        )
         return
 
     try:
         valid_password(new_password)
     except:
-        click.echo(click.style("sorry. The passwords must match {} ".format(password_pattern), fg="red"))
+        click.echo(
+            click.style(
+                "sorry. The passwords must match {} ".format(password_pattern), fg="red"
+            )
+        )
         return
 
     # generate password salt
@@ -113,19 +175,25 @@ def reset_email(email, new_email, email_confirm):
     :return:
     """
     if str(new_email).strip() != str(email_confirm).strip():
-        click.echo(click.style("Sorry, new email and confirm email do not match.", fg="red"))
+        click.echo(
+            click.style("Sorry, new email and confirm email do not match.", fg="red")
+        )
         return
 
     account = db.session.query(Account).filter(Account.email == email).one_or_none()
 
     if not account:
-        click.echo(click.style("sorry. the account: [{}] not exist .".format(email), fg="red"))
+        click.echo(
+            click.style("sorry. the account: [{}] not exist .".format(email), fg="red")
+        )
         return
 
     try:
         email_validate(new_email)
     except:
-        click.echo(click.style("sorry. {} is not a valid email. ".format(email), fg="red"))
+        click.echo(
+            click.style("sorry. {} is not a valid email. ".format(email), fg="red")
+        )
         return
 
     account.email = new_email
@@ -142,7 +210,8 @@ def reset_email(email, new_email, email_confirm):
 )
 @click.confirmation_option(
     prompt=click.style(
-        "Are you sure you want to reset encrypt key pair?" " this operation cannot be rolled back!",
+        "Are you sure you want to reset encrypt key pair?"
+        " this operation cannot be rolled back!",
         fg="red",
     )
 )
@@ -169,13 +238,20 @@ def reset_encrypt_key_pair():
 
         tenant.encrypt_public_key = generate_key_pair(tenant.id)
 
-        db.session.query(Provider).filter(Provider.provider_type == "custom", Provider.tenant_id == tenant.id).delete()
-        db.session.query(ProviderModel).filter(ProviderModel.tenant_id == tenant.id).delete()
+        db.session.query(Provider).filter(
+            Provider.provider_type == "custom", Provider.tenant_id == tenant.id
+        ).delete()
+        db.session.query(ProviderModel).filter(
+            ProviderModel.tenant_id == tenant.id
+        ).delete()
         db.session.commit()
 
         click.echo(
             click.style(
-                "Congratulations! " "the asymmetric key pair of workspace {} has been reset.".format(tenant.id),
+                "Congratulations! "
+                "the asymmetric key pair of workspace {} has been reset.".format(
+                    tenant.id
+                ),
                 fg="green",
             )
         )
@@ -220,12 +296,15 @@ def migrate_annotation_vector_database():
         for app in apps:
             total_count = total_count + 1
             click.echo(
-                f"Processing the {total_count} app {app.id}. " + f"{create_count} created, {skipped_count} skipped."
+                f"Processing the {total_count} app {app.id}. "
+                + f"{create_count} created, {skipped_count} skipped."
             )
             try:
                 click.echo("Create app annotation index: {}".format(app.id))
                 app_annotation_setting = (
-                    db.session.query(AppAnnotationSetting).filter(AppAnnotationSetting.app_id == app.id).first()
+                    db.session.query(AppAnnotationSetting)
+                    .filter(AppAnnotationSetting.app_id == app.id)
+                    .first()
                 )
 
                 if not app_annotation_setting:
@@ -235,13 +314,24 @@ def migrate_annotation_vector_database():
                 # get dataset_collection_binding info
                 dataset_collection_binding = (
                     db.session.query(DatasetCollectionBinding)
-                    .filter(DatasetCollectionBinding.id == app_annotation_setting.collection_binding_id)
+                    .filter(
+                        DatasetCollectionBinding.id
+                        == app_annotation_setting.collection_binding_id
+                    )
                     .first()
                 )
                 if not dataset_collection_binding:
-                    click.echo("App annotation collection binding is not exist: {}".format(app.id))
+                    click.echo(
+                        "App annotation collection binding is not exist: {}".format(
+                            app.id
+                        )
+                    )
                     continue
-                annotations = db.session.query(MessageAnnotation).filter(MessageAnnotation.app_id == app.id).all()
+                annotations = (
+                    db.session.query(MessageAnnotation)
+                    .filter(MessageAnnotation.app_id == app.id)
+                    .all()
+                )
                 dataset = Dataset(
                     id=app.id,
                     tenant_id=app.tenant_id,
@@ -263,7 +353,9 @@ def migrate_annotation_vector_database():
                         )
                         documents.append(document)
 
-                vector = Vector(dataset, attributes=["doc_id", "annotation_id", "app_id"])
+                vector = Vector(
+                    dataset, attributes=["doc_id", "annotation_id", "app_id"]
+                )
                 click.echo(f"Start to migrate annotation, app_id: {app.id}.")
 
                 try:
@@ -275,7 +367,11 @@ def migrate_annotation_vector_database():
                         )
                     )
                 except Exception as e:
-                    click.echo(click.style(f"Failed to delete vector index for app {app.id}.", fg="red"))
+                    click.echo(
+                        click.style(
+                            f"Failed to delete vector index for app {app.id}.", fg="red"
+                        )
+                    )
                     raise e
                 if documents:
                     try:
@@ -305,7 +401,9 @@ def migrate_annotation_vector_database():
             except Exception as e:
                 click.echo(
                     click.style(
-                        "Create app annotation index error: {} {}".format(e.__class__.__name__, str(e)),
+                        "Create app annotation index error: {} {}".format(
+                            e.__class__.__name__, str(e)
+                        ),
                         fg="red",
                     )
                 )
@@ -367,13 +465,18 @@ def migrate_knowledge_vector_database():
                     if dataset.collection_binding_id:
                         dataset_collection_binding = (
                             db.session.query(DatasetCollectionBinding)
-                            .filter(DatasetCollectionBinding.id == dataset.collection_binding_id)
+                            .filter(
+                                DatasetCollectionBinding.id
+                                == dataset.collection_binding_id
+                            )
                             .one_or_none()
                         )
                         if dataset_collection_binding:
                             collection_name = dataset_collection_binding.collection_name
                         else:
-                            raise ValueError("Dataset Collection Bindings is not exist!")
+                            raise ValueError(
+                                "Dataset Collection Bindings is not exist!"
+                            )
                     else:
                         dataset_id = dataset.id
                         collection_name = Dataset.gen_collection_name_by_id(dataset_id)
@@ -395,20 +498,22 @@ def migrate_knowledge_vector_database():
                     dataset_id = dataset.id
                     collection_name = Dataset.gen_collection_name_by_id(dataset_id)
                     index_struct_dict = {
-                        "type": 'relyt',
-                        "vector_store": {"class_prefix": collection_name}
+                        "type": "relyt",
+                        "vector_store": {"class_prefix": collection_name},
                     }
                     dataset.index_struct = json.dumps(index_struct_dict)
                 elif vector_type == "relyt":
                     dataset_id = dataset.id
                     collection_name = Dataset.gen_collection_name_by_id(dataset_id)
                     index_struct_dict = {
-                        "type": 'relyt',
-                        "vector_store": {"class_prefix": collection_name}
+                        "type": "relyt",
+                        "vector_store": {"class_prefix": collection_name},
                     }
                     dataset.index_struct = json.dumps(index_struct_dict)
                 else:
-                    raise ValueError(f"Vector store {config.get('VECTOR_STORE')} is not supported.")
+                    raise ValueError(
+                        f"Vector store {config.get('VECTOR_STORE')} is not supported."
+                    )
 
                 vector = Vector(dataset)
                 click.echo(f"Start to migrate dataset {dataset.id}.")
@@ -499,7 +604,9 @@ def migrate_knowledge_vector_database():
                 db.session.rollback()
                 click.echo(
                     click.style(
-                        "Create dataset index error: {} {}".format(e.__class__.__name__, str(e)),
+                        "Create dataset index error: {} {}".format(
+                            e.__class__.__name__, str(e)
+                        ),
                         fg="red",
                     )
                 )
@@ -560,9 +667,9 @@ def convert_to_agent_apps():
                 db.session.commit()
 
                 # update conversation mode to agent
-                db.session.query(Conversation).filter(Conversation.app_id == app.id).update(
-                    {Conversation.mode: AppMode.AGENT_CHAT.value}
-                )
+                db.session.query(Conversation).filter(
+                    Conversation.app_id == app.id
+                ).update({Conversation.mode: AppMode.AGENT_CHAT.value})
 
                 db.session.commit()
                 click.echo(click.style("Converted app: {}".format(app.id), fg="green"))
@@ -589,3 +696,4 @@ def register_commands(app):
     app.cli.add_command(reset_encrypt_key_pair)
     app.cli.add_command(vdb_migrate)
     app.cli.add_command(convert_to_agent_apps)
+    app.cli.add_command(create_workspace)

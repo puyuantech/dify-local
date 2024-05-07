@@ -440,13 +440,12 @@ class RegisterService:
 
             if open_id is not None or provider is not None:
                 AccountService.link_account_integrate(provider, open_id, account)
-            if current_app.config['EDITION'] != 'SELF_HOSTED':
-                tenant = TenantService.create_tenant(f"{account.name}'s Workspace")
+            tenant = TenantService.create_tenant(f"{account.name}'s Workspace")
 
-                TenantService.create_tenant_member(tenant, account, role='owner')
-                account.current_tenant = tenant
+            TenantService.create_tenant_member(tenant, account, role='owner')
+            account.current_tenant = tenant
 
-                tenant_was_created.send(tenant)
+            tenant_was_created.send(tenant)
 
             db.session.commit()
         except Exception as e:
