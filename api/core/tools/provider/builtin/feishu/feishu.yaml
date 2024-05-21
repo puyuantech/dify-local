@@ -11,3 +11,35 @@ identity:
     pt_BR: Feishu group bot
   icon: icon.svg
 credentials_for_provider:
+  app_id:
+    type: secret-input
+    required: true
+    label:
+      en_US: Feishu APP ID
+      zh_Hans: Feishu APP ID
+      pt_BR: Feishu APP ID
+    placeholder:
+      en_US: Please input your Feishu APP ID
+      zh_Hans: 请输入你的 Feishu APP ID
+      pt_BR: Please input your Feishu APP ID
+    help:
+      en_US: Get your Feishu APP ID from Feishu
+      zh_Hans: 从飞书获取您的 Feishu APP ID
+      pt_BR: Get your Feishu APP ID from Feishu
+    url: https://open.feishu.cn/app
+  app_secret:
+    type: secret-input
+    required: true
+    label:
+      en_US: Feishu APP SECRET
+      zh_Hans: Feishu APP SECRET
+      pt_BR: Feishu APP SECRET
+    placeholder:
+      en_US: Please input your Feishu APP SECRET
+      zh_Hans: 请输入你的 Feishu APP SECRET
+      pt_BR: Please input your Feishu APP SECRET
+    help:
+      en_US: Get your Feishu APP SECRET from Feishu
+      zh_Hans: 从飞书获取您的 Feishu APP SECRET
+      pt_BR: Get your Feishu APP SECRET from Feishu
+    url: https://open.feishu.cn/app
