@@ -1,50 +1,67 @@
+import re
 from typing import Any, Union
 
-import httpx
+import pandas as pd
+from feishuconnector import FeishuConnector
 
 from core.tools.entities.tool_entities import ToolInvokeMessage
 from core.tools.tool.builtin_tool import BuiltinTool
-from core.tools.utils.uuid_utils import is_valid_uuid
 
 
-class FeishuGetTableTool(BuiltinTool):
-    def _invoke(self, user_id: str, tool_parameters: dict[str, Any]
-                ) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
-        """
-            invoke tools
-            API document: https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot
-        """
+def extract_table(md_text):
+    if not md_text:
+        raise ValueError("The Markdown text is empty.")
+    lines = md_text.split("\n")
+    table_elements = []
+    delimeter = "|"
+    for line in lines:
+        if line.startswith(delimeter) and line.endswith(delimeter):
+            cells = [cell.strip() for cell in line.strip(delimeter).split(delimeter)]
+            if set(cells[0]) == set("-"):
+                continue
+            table_elements.append(cells)
+    assert table_elements, "No tables found in the Markdown text."
+    assert (
+        len(table_elements) > 1
+    ), "At least two table lines must be present in the Markdown text."
+    for cells in table_elements[1:]:
+        assert len(cells) == len(
+            table_elements[0]
+        ), "All tables must have the same number of columns."
+    df = pd.DataFrame(table_elements[1:], columns=table_elements[0])
+    return df
 
-        url = "https://open.feishu.cn/open-apis/bot/v2/hook"
 
-        content = tool_parameters.get('content', '')
-        if not content:
-            return self.create_text_message('Invalid parameter content')
+def write_feishu_table(app_id, app_secret, table_url, table_data):
+    fc = FeishuConnector({"default": None})
+    fc.init(app_id=app_id, app_secret=app_secret)
+    assert "sheet" in table_url, "Only Wiki sheet is supported currently"
+    match = re.findall(r"wiki/(.*)\?sheet=(.*)", table_url)
+    assert match, "Invalid parameter table_url"
+    assert len(match[0]) == 2, "Invalid parameter table_url"
+    df = extract_table(table_data)
+    return fc.write_sheet_data(
+        match[0][0], match[0][1], [df.columns.tolist()] + df.values.tolist()
+    )
 
-        hook_key = tool_parameters.get('hook_key', '')
-        if not is_valid_uuid(hook_key):
-            return self.create_text_message(
-                f'Invalid parameter hook_key ${hook_key}, not a valid UUID')
 
-        msg_type = 'text'
-        api_url = f'{url}/{hook_key}'
-        headers = {
-            'Content-Type': 'application/json',
-        }
-        params = {}
-        payload = {
-            "msg_type": msg_type,
-            "content": {
-                "text": content,
-            }
-        }
-
+class FeishuWriteTableTool(BuiltinTool):
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
+        table_url = tool_parameters.get("table_url", "")
+        if not table_url:
+            return self.create_text_message("Invalid parameter table_url")
+        table_data = tool_parameters.get("table_data", "")
+        if not table_data:
+            return self.create_text_message("Invalid parameter table_data")
         try:
-            res = httpx.post(api_url, headers=headers, params=params, json=payload)
-            if res.is_success:
-                return self.create_text_message("Text message sent successfully")
-            else:
-                return self.create_text_message(
-                    f"Failed to send the text message, status code: {res.status_code}, response: {res.text}")
+            ret = write_feishu_table(
+                self.runtime.credentials["app_id"],
+                self.runtime.credentials["app_secret"],
+                table_url,
+                table_data,
+            )
+            return self.create_text_message(str(ret))
         except Exception as e:
-            return self.create_text_message("Failed to send message to group chat bot. {}".format(e))
+            return self.create_text_message("Failed to get table. {}".format(e))

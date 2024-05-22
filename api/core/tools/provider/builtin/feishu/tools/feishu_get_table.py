@@ -52,13 +52,19 @@ class FeishuGetTableTool(BuiltinTool):
         table_url = tool_parameters.get("table_url", "")
         if not table_url:
             return self.create_text_message("Invalid parameter table_url")
-
+        output_format = tool_parameters.get("output_format", "markdown")
         try:
             df = get_feishu_table(
                 self.runtime.credentials["app_id"],
                 self.runtime.credentials["app_secret"],
                 table_url,
             )
-            return self.create_text_message(df.to_markdown(index=False))
+            if output_format == "csv":
+                ret = df.to_csv(index=False)
+            elif output_format == "markdown":
+                ret = df.to_markdown(index=False)
+            else:
+                assert False, "Invalid output format"
+            return self.create_text_message(ret)
         except Exception as e:
             return self.create_text_message("Failed to get table. {}".format(e))

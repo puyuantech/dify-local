@@ -50,3 +50,24 @@ parameters:
       pt_BR: table url
     llm_description: table url
     form: llm
+  - name: output_format
+    type: select
+    required: false
+    default: markdown
+    options:
+      - label:
+          en_US: markdown
+        value: markdown
+      - label:
+          en_US: csv
+        value: csv
+    label:
+      en_US: output format
+      zh_Hans: 输出格式
+      pt_BR: output format
+    human_description:
+      en_US: output format
+      zh_Hans: 输出格式
+      pt_BR: output format
+    llm_description: output format
+    form: llm

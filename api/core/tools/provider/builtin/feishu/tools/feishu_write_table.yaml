@@ -11,30 +11,31 @@ description:
     en_US: Write table on Feishu via group bot
     zh_Hans: 通过飞书的群机器人写入表格
     pt_BR: Write table on Feishu via group bot
-  llm: A tool for write table to Feishu(飞书) .
+  llm: A tool for write table from Feishu(飞书) .
 parameters:
-  - name: hook_key
-    type: secret-input
-    required: true
-    label:
-      en_US: Feishu Group bot webhook key
-      zh_Hans: 群机器人webhook的key
-      pt_BR: Feishu Group bot webhook key
-    human_description:
-      en_US: Feishu Group bot webhook key
-      zh_Hans: 群机器人webhook的key
-      pt_BR: Feishu Group bot webhook key
-    form: form
-  - name: content
+  - name: table_url
     type: string
     required: true
     label:
-      en_US: content
-      zh_Hans: 消息内容
-      pt_BR: content
+      en_US: table url
+      zh_Hans: 表格 url
+      pt_BR: table url
     human_description:
-      en_US: Content to sent to the group.
-      zh_Hans: 群消息文本
-      pt_BR: Content to sent to the group.
-    llm_description: Content of the message
+      en_US: table url
+      zh_Hans: 表格 url
+      pt_BR: table url
+    llm_description: table url
+    form: llm
+  - name: table_data
+    type: string
+    required: true
+    label:
+      en_US: table data
+      zh_Hans: 表格 数据
+      pt_BR: table data
+    human_description:
+      en_US: table data
+      zh_Hans: 表格 数据
+      pt_BR: table data
+    llm_description: table data
     form: llm
