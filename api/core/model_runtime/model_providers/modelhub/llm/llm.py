@@ -306,7 +306,7 @@ class ModelHubLargeLanguageModel(_CommonOAI_API_Compat, LargeLanguageModel):
             endpoint_url,
             headers=headers,
             json=data,
-            timeout=(10, 60),
+            timeout=(10, 600),
             stream=stream
         )
 

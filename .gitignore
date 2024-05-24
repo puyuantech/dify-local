@@ -4,8 +4,10 @@ __pycache__/
 *$py.class
 
 # C extensions
+yarn.lock
 *.so
-
+std.err
+std.out
 # Distribution / packaging
 .Python
 build/

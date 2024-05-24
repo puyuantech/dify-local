@@ -13,30 +13,6 @@ description:
     pt_BR: Get table on Feishu via group bot
   llm: A tool for get table from Feishu(飞书) .
 parameters:
-  # - name: app_id
-  #   type: secret-input
-  #   required: true
-  #   label:
-  #     en_US: Feishu bot app_id
-  #     zh_Hans: 飞书机器人app_id
-  #     pt_BR: Feishu bot app_id
-  #   human_description:
-  #     en_US: Feishu bot app_id
-  #     zh_Hans: 飞书机器人app_id
-  #     pt_BR: Feishu bot app_id
-  #   form: form
-  # - name: app_secret
-  #   type: secret-input
-  #   required: true
-  #   label:
-  #     en_US: Feishu bot app_secret
-  #     zh_Hans: 飞书机器人app_secret
-  #     pt_BR: Feishu bot app_secret
-  #   human_description:
-  #     en_US: Feishu bot app_secret
-  #     zh_Hans: 飞书机器人app_secret
-  #     pt_BR: Feishu bot app_secret
-  #   form: form
   - name: table_url
     type: string
     required: true
@@ -52,8 +28,7 @@ parameters:
     form: llm
   - name: output_format
     type: select
-    required: false
-    default: markdown
+    required: true
     options:
       - label:
           en_US: markdown
