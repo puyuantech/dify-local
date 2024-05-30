@@ -1,7 +1,7 @@
-model: Baichuan2-Turbo
+model: gpt-4-turbo-2024-04-09
 label:
-  zh_Hans: Baichuan2-Turbo
-  en_US: Baichuan2-Turbo
+  zh_Hans: gpt-4-turbo-2024-04-09
+  en_US: gpt-4-turbo-2024-04-09
 model_type: llm
 features:
   - multi-tool-call
@@ -9,7 +9,7 @@ features:
   - stream-tool-call
 model_properties:
   mode: chat
-  context_size: 32768
+  context_size: 128000
 parameter_rules:
   - name: temperature
     use_template: temperature
@@ -23,11 +23,11 @@ parameter_rules:
     use_template: max_tokens
     default: 2048
     min: 1
-    max: 32768
+    max: 128000
   - name: response_format
     use_template: response_format
 pricing:
-  input: "0.008"
-  output: "0.008"
+  input: "0.01"
+  output: "0.03"
   unit: "0.001"
-  currency: CNY
+  currency: USD

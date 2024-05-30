@@ -1,7 +1,7 @@
-model: Baichuan2-Turbo
+model: moonshot-v1-32k
 label:
-  zh_Hans: Baichuan2-Turbo
-  en_US: Baichuan2-Turbo
+  zh_Hans: moonshot-v1-32k
+  en_US: moonshot-v1-32k
 model_type: llm
 features:
   - multi-tool-call
@@ -27,7 +27,7 @@ parameter_rules:
   - name: response_format
     use_template: response_format
 pricing:
-  input: "0.008"
-  output: "0.008"
+  input: "0.024"
+  output: "0.024"
   unit: "0.001"
   currency: CNY

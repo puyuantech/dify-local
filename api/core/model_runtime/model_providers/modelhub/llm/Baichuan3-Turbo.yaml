@@ -1,7 +1,7 @@
-model: Baichuan2-Turbo
+model: Baichuan3-Turbo
 label:
-  zh_Hans: Baichuan2-Turbo
-  en_US: Baichuan2-Turbo
+  zh_Hans: Baichuan3-Turbo
+  en_US: Baichuan3-Turbo
 model_type: llm
 features:
   - multi-tool-call
@@ -27,7 +27,7 @@ parameter_rules:
   - name: response_format
     use_template: response_format
 pricing:
-  input: "0.008"
-  output: "0.008"
+  input: "0.012"
+  output: "0.012"
   unit: "0.001"
   currency: CNY

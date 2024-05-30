@@ -1,7 +1,7 @@
-model: Baichuan2-Turbo
+model: abab6.5-chat
 label:
-  zh_Hans: Baichuan2-Turbo
-  en_US: Baichuan2-Turbo
+  zh_Hans: abab6.5-chat
+  en_US: abab6.5-chat
 model_type: llm
 features:
   - multi-tool-call
@@ -9,7 +9,7 @@ features:
   - stream-tool-call
 model_properties:
   mode: chat
-  context_size: 32768
+  context_size: 8192
 parameter_rules:
   - name: temperature
     use_template: temperature
@@ -23,11 +23,11 @@ parameter_rules:
     use_template: max_tokens
     default: 2048
     min: 1
-    max: 32768
+    max: 8192
   - name: response_format
     use_template: response_format
 pricing:
-  input: "0.008"
-  output: "0.008"
+  input: "0.03"
+  output: "0.03"
   unit: "0.001"
   currency: CNY
