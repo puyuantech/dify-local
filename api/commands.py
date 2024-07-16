@@ -27,6 +27,102 @@ from models.provider import Provider, ProviderModel
 from services.account_service import RegisterService, TenantService
 
 
+@click.command("register", help="Register a new accout")
+@click.option(
+    "--email", prompt=True, help="The email address of the account you want to register"
+)
+@click.option(
+    "--name", prompt=True, help="The name of the account you want to register"
+)
+@click.option(
+    "--password", prompt=True, help="The password of the account you want to register"
+)
+def register(email, name, password):
+    """
+    Register a new accout
+    """
+    try:
+        email_validate(email)
+    except:
+        click.echo(
+            click.style("sorry. {} is not a valid email. ".format(email), fg="red")
+        )
+        return
+
+    try:
+        valid_password(password)
+    except:
+        click.echo(
+            click.style(
+                "sorry. The passwords must match {} ".format(password_pattern), fg="red"
+            )
+        )
+        return
+
+    account = db.session.query(Account).filter(Account.email == email).one_or_none()
+
+    if account:
+        click.echo(
+            click.style(
+                "sorry. the account: [{}] already exists .".format(email), fg="red"
+            )
+        )
+        return
+
+    account = RegisterService.register(email, name, password)
+    click.echo(
+        click.style("Congratulations!, account has been registered.", fg="green")
+    )
+
+
+@click.command("register", help="Register a new accout")
+@click.option(
+    "--email", prompt=True, help="The email address of the account you want to register"
+)
+@click.option(
+    "--name", prompt=True, help="The name of the account you want to register"
+)
+@click.option(
+    "--password", prompt=True, help="The password of the account you want to register"
+)
+def register(email, name, password):
+    """
+    Register a new accout
+    """
+    try:
+        email_validate(email)
+    except:
+        click.echo(
+            click.style("sorry. {} is not a valid email. ".format(email), fg="red")
+        )
+        return
+
+    try:
+        valid_password(password)
+    except:
+        click.echo(
+            click.style(
+                "sorry. The passwords must match {} ".format(password_pattern), fg="red"
+            )
+        )
+        return
+
+    account = db.session.query(Account).filter(Account.email == email).one_or_none()
+
+    if account:
+        click.echo(
+            click.style(
+                "sorry. the account: [{}] already exists .".format(email), fg="red"
+            )
+        )
+        return
+
+    account = RegisterService.register(email, name, password)
+    click.echo(
+        click.style("Congratulations!, account has been registered.", fg="green")
+    )
+
+
 @click.command("reset-password", help="Reset the account password.")
 @click.option("--email", prompt=True, help="Account email to reset password for")
 @click.option("--new-password", prompt=True, help="New password")
@@ -643,6 +739,7 @@ where sites.id is null limit 1000"""
 
 
 def register_commands(app):
+    app.cli.add_command(register)
     app.cli.add_command(reset_password)
     app.cli.add_command(reset_email)
     app.cli.add_command(reset_encrypt_key_pair)
