@@ -1,0 +1,48 @@
+identity:
+  name: feishu_get_table
+  author: Hangxing Wei
+  label:
+    en_US: Get Table
+    zh_Hans: 获取表格
+    pt_BR: Get Table
+  icon: icon.png
+description:
+  human:
+    en_US: Get table on Feishu via group bot
+    zh_Hans: 通过飞书的群机器人获取表格
+    pt_BR: Get table on Feishu via group bot
+  llm: A tool for get table from Feishu(飞书) .
+parameters:
+  - name: table_url
+    type: string
+    required: true
+    label:
+      en_US: table url
+      zh_Hans: 表格 url
+      pt_BR: table url
+    human_description:
+      en_US: table url
+      zh_Hans: 表格 url
+      pt_BR: table url
+    llm_description: table url
+    form: llm
+  - name: output_format
+    type: select
+    required: true
+    options:
+      - label:
+          en_US: markdown
+        value: markdown
+      - label:
+          en_US: csv
+        value: csv
+    label:
+      en_US: output format
+      zh_Hans: 输出格式
+      pt_BR: output format
+    human_description:
+      en_US: output format
+      zh_Hans: 输出格式
+      pt_BR: output format
+    llm_description: output format
+    form: llm

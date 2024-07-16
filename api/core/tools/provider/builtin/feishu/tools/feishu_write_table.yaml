@@ -1,0 +1,41 @@
+identity:
+  name: feishu_write_table
+  author: Hangxing Wei
+  label:
+    en_US: Write Table
+    zh_Hans: 写入表格
+    pt_BR: Write Table
+  icon: icon.png
+description:
+  human:
+    en_US: Write table on Feishu via group bot
+    zh_Hans: 通过飞书的群机器人写入表格
+    pt_BR: Write table on Feishu via group bot
+  llm: A tool for write table from Feishu(飞书) .
+parameters:
+  - name: table_url
+    type: string
+    required: true
+    label:
+      en_US: table url
+      zh_Hans: 表格 url
+      pt_BR: table url
+    human_description:
+      en_US: table url
+      zh_Hans: 表格 url
+      pt_BR: table url
+    llm_description: table url
+    form: llm
+  - name: table_data
+    type: string
+    required: true
+    label:
+      en_US: table data
+      zh_Hans: 表格 数据
+      pt_BR: table data
+    human_description:
+      en_US: table data
+      zh_Hans: 表格 数据
+      pt_BR: table data
+    llm_description: table data
+    form: llm
