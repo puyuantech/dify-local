@@ -1,8 +1,8 @@
-import re
 from typing import Any, Union
 
+import anyio
 import pandas as pd
-from feishuconnector import FeishuConnector
+from slark import AsyncLark
 
 from core.tools.entities.tool_entities import ToolInvokeMessage
 from core.tools.tool.builtin_tool import BuiltinTool
@@ -17,7 +17,7 @@ def extract_table(md_text):
     for line in lines:
         if line.startswith(delimeter) and line.endswith(delimeter):
             cells = [cell.strip() for cell in line.strip(delimeter).split(delimeter)]
-            if set(cells[0]) == set("-"):
+            if set(cells[0]) == set(":-"):
                 continue
             table_elements.append(cells)
     assert table_elements, "No tables found in the Markdown text."
@@ -32,18 +32,6 @@ def extract_table(md_text):
     return df
 
 
-def write_feishu_table(app_id, app_secret, table_url, table_data):
-    fc = FeishuConnector({"default": None})
-    fc.init(app_id=app_id, app_secret=app_secret)
-    assert "sheet" in table_url, "Only Wiki sheet is supported currently"
-    match = re.findall(r"wiki/(.*)\?sheet=(.*)", table_url)
-    assert match, "Invalid parameter table_url"
-    assert len(match[0]) == 2, "Invalid parameter table_url"
-    df = extract_table(table_data)
-    return fc.write_sheet_data(
-        match[0][0], match[0][1], [df.columns.tolist()] + df.values.tolist()
-    )
-
 
 class FeishuWriteTableTool(BuiltinTool):
     def _invoke(
@@ -55,13 +43,15 @@ class FeishuWriteTableTool(BuiltinTool):
         table_data = tool_parameters.get("table_data", "")
         if not table_data:
             return self.create_text_message("Invalid parameter table_data")
+        
+        credentials = self.runtime.credentials
         try:
-            ret = write_feishu_table(
-                self.runtime.credentials["app_id"],
-                self.runtime.credentials["app_secret"],
-                table_url,
-                table_data,
-            )
-            return self.create_text_message(str(ret))
+            df = extract_table(table_data)
+            lark = AsyncLark(app_id=credentials["app_id"], app_secret=credentials["app_secret"])
+            async def write_feishu_table(table_url, df, has_header=True):
+                return await lark.sheets.write(table_url, data=df, has_header=has_header)
+            
+            response = anyio.run(write_feishu_table, table_url, df)
+            return self.create_text_message(str(response))
         except Exception as e:
             return self.create_text_message("Failed to get table. {}".format(e))

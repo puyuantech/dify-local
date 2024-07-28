@@ -6,76 +6,73 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-exclude=[
-    "migrations/*",
-]
+exclude = ["migrations/*"]
 line-length = 120
 
 [tool.ruff.lint]
 preview = true
 select = [
-    "B", # flake8-bugbear rules
-    "C4", # flake8-comprehensions
-    "E", # pycodestyle E rules
-    "F", # pyflakes rules
-    "FURB", # refurb rules
-    "I", # isort rules
-    "N", # pep8-naming
-    "PT", # flake8-pytest-style rules
+    "B",       # flake8-bugbear rules
+    "C4",      # flake8-comprehensions
+    "E",       # pycodestyle E rules
+    "F",       # pyflakes rules
+    "FURB",    # refurb rules
+    "I",       # isort rules
+    "N",       # pep8-naming
+    "PT",      # flake8-pytest-style rules
     "PLC0208", # iteration-over-set
     "PLC2801", # unnecessary-dunder-call
     "PLC0414", # useless-import-alias
     "PLR0402", # manual-from-import
     "PLR1711", # useless-return
     "PLR1714", # repeated-equality-comparison
-    "RUF013", # implicit-optional
-    "RUF019", # unnecessary-key-check
-    "RUF100", # unused-noqa
-    "RUF101", # redirected-noqa
-    "S506", # unsafe-yaml-load
-    "SIM", # flake8-simplify rules
-    "TRY400", # error-instead-of-exception
-    "TRY401", # verbose-log-message
-    "UP", # pyupgrade rules
-    "W191", # tab-indentation
-    "W605", # invalid-escape-sequence
+    "RUF013",  # implicit-optional
+    "RUF019",  # unnecessary-key-check
+    "RUF100",  # unused-noqa
+    "RUF101",  # redirected-noqa
+    "S506",    # unsafe-yaml-load
+    "SIM",     # flake8-simplify rules
+    "TRY400",  # error-instead-of-exception
+    "TRY401",  # verbose-log-message
+    "UP",      # pyupgrade rules
+    "W191",    # tab-indentation
+    "W605",    # invalid-escape-sequence
 ]
 ignore = [
-    "E402", # module-import-not-at-top-of-file
-    "E711", # none-comparison
-    "E712", # true-false-comparison
-    "E721", # type-comparison
-    "E722", # bare-except
-    "E731", # lambda-assignment
-    "F821", # undefined-name
-    "F841", # unused-variable
+    "E402",    # module-import-not-at-top-of-file
+    "E711",    # none-comparison
+    "E712",    # true-false-comparison
+    "E721",    # type-comparison
+    "E722",    # bare-except
+    "E731",    # lambda-assignment
+    "F821",    # undefined-name
+    "F841",    # unused-variable
     "FURB113", # repeated-append
     "FURB152", # math-constant
-    "UP007", # non-pep604-annotation
-    "UP032", # f-string
-    "B005", # strip-with-multi-characters
-    "B006", # mutable-argument-default
-    "B007", # unused-loop-control-variable
-    "B026", # star-arg-unpacking-after-keyword-arg
-    "B904", # raise-without-from-inside-except
-    "B905", # zip-without-explicit-strict
-    "N806", # non-lowercase-variable-in-function
-    "N815", # mixed-case-variable-in-class-scope
-    "PT011", # pytest-raises-too-broad
-    "SIM102", # collapsible-if
-    "SIM103", # needless-bool
-    "SIM105", # suppressible-exception
-    "SIM107", # return-in-try-except-finally
-    "SIM108", # if-else-block-instead-of-if-exp
-    "SIM113", # eumerate-for-loop
-    "SIM117", # multiple-with-statements
-    "SIM210", # if-expr-with-true-false
-    "SIM300", # yoda-conditions,
+    "UP007",   # non-pep604-annotation
+    "UP032",   # f-string
+    "B005",    # strip-with-multi-characters
+    "B006",    # mutable-argument-default
+    "B007",    # unused-loop-control-variable
+    "B026",    # star-arg-unpacking-after-keyword-arg
+    "B904",    # raise-without-from-inside-except
+    "B905",    # zip-without-explicit-strict
+    "N806",    # non-lowercase-variable-in-function
+    "N815",    # mixed-case-variable-in-class-scope
+    "PT011",   # pytest-raises-too-broad
+    "SIM102",  # collapsible-if
+    "SIM103",  # needless-bool
+    "SIM105",  # suppressible-exception
+    "SIM107",  # return-in-try-except-finally
+    "SIM108",  # if-else-block-instead-of-if-exp
+    "SIM113",  # eumerate-for-loop
+    "SIM117",  # multiple-with-statements
+    "SIM210",  # if-expr-with-true-false
+    "SIM300",  # yoda-conditions,
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"app.py" = [
-]
+"app.py" = []
 "__init__.py" = [
     "F401", # unused-import
     "F811", # redefined-while-unused
@@ -92,14 +89,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.pyflakes]
-extend-generics=[
-    "_pytest.monkeypatch",
-    "tests.integration_tests",
-]
+extend-generics = ["_pytest.monkeypatch", "tests.integration_tests"]
 
 [tool.ruff.format]
-exclude = [
-]
+exclude = []
 
 [tool.poetry]
 name = "dify-api"
@@ -180,9 +173,16 @@ tencentcloud-sdk-python-hunyuan = "~3.0.1158"
 tiktoken = "~0.8.0"
 tokenizers = "~0.15.0"
 transformers = "~4.35.0"
-unstructured = { version = "~0.16.1", extras = ["docx", "epub", "md", "msg", "ppt", "pptx"] }
+unstructured = { version = "~0.16.1", extras = [
+    "docx",
+    "epub",
+    "md",
+    "msg",
+    "ppt",
+    "pptx",
+] }
 validators = "0.21.0"
-volcengine-python-sdk = {extras = ["ark"], version = "~1.0.98"}
+volcengine-python-sdk = { extras = ["ark"], version = "~1.0.98" }
 websocket-client = "~1.7.0"
 werkzeug = "~3.0.1"
 xinference-client = "0.15.2"
@@ -204,7 +204,12 @@ safetensors = "~0.4.3"
 ############################################################
 # [ Tools ] dependency group
 ############################################################
-[tool.poetry.group.tools.dependencies]
+onnxruntime = ">=1.16.3,<1.17.0"
+puyuan-modelhub = "^1.2.3"
+slark = "^0.1.4"
+anyio = "^4.4.0"
+
+[tool.poetry.group.tool.dependencies]
 arxiv = "2.1.0"
 cloudscraper = "1.2.71"
 duckduckgo-search = "~6.3.0"
@@ -217,7 +222,13 @@ numexpr = "~2.9.0"
 pydub = "~0.25.1"
 qrcode = "~7.4.2"
 twilio = "~9.0.4"
-vanna = { version = "0.7.5", extras = ["postgres", "mysql", "clickhouse", "duckdb", "oracle"] }
+vanna = { version = "0.7.5", extras = [
+    "postgres",
+    "mysql",
+    "clickhouse",
+    "duckdb",
+    "oracle",
+] }
 wikipedia = "1.4.0"
 yfinance = "~0.2.40"
 
@@ -282,4 +293,8 @@ pytest-mock = "~3.14.0"
 optional = true
 [tool.poetry.group.lint.dependencies]
 dotenv-linter = "~0.5.0"
-ruff = "~0.7.3"
+
+[[tool.poetry.source]]
+name = "mirror"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+priority = "primary"
