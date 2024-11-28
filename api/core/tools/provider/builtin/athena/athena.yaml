@@ -1,0 +1,47 @@
+identity:
+  author: Hangxing Wei
+  name: athena
+  label:
+    en_US: Athena
+    zh_Hans: Athena
+    pt_BR: Athena
+  description:
+    en_US: Athena Connect
+    zh_Hans: 连接 Athena
+    pt_BR: Athena Connect
+  icon: icon.png
+  tags:
+    - productivity
+credentials_for_provider:
+  api_key:
+    type: secret-input
+    required: true
+    label:
+      en_US: Athena API KEY
+      zh_Hans: Athena API KEY
+      pt_BR: Athena API KEY
+    placeholder:
+      en_US: Please input your Athena API KEY
+      zh_Hans: 请输入你的 Athena API KEY
+      pt_BR: Please input your Athena API KEY
+    help:
+      en_US: Get your Athena API KEY from Athena
+      zh_Hans: 从 Athena 获取您的 Athena API KEY
+      pt_BR: Get your Athena API KEY from Athena
+    url: https://athena.puyuan.tech/
+  base_url:
+    type: secret-input
+    required: true
+    label:
+      en_US: Athena Base URL
+      zh_Hans: Athena Base URL
+      pt_BR: Athena Base URL
+    placeholder:
+      en_US: Please input your Athena Base URL
+      zh_Hans: 请输入你的 Athena Base URL
+      pt_BR: Please input your Athena Base URL
+    help:
+      en_US: Get your Athena Base URL from Athena
+      zh_Hans: 从 Athena 获取您的 Athena Base URL
+      pt_BR: Get your Athena Base URL from Athena
+    url: https://athena.puyuan.tech/
