@@ -1,0 +1,31 @@
+identity:
+  author: Yuhang Tu
+  name: send_url
+  label:
+    en_US: Send URL
+    zh_Hans: Send URL
+    pt_BR: Send URL
+  description:
+    en_US: Send URL
+    zh_Hans: Send URL
+    pt_BR: Send URL
+  icon: icon.png
+  tags:
+    - productivity
+credentials_for_provider:
+  api_key:
+    type: secret-input
+    required: false
+    label:
+      en_US: test
+      zh_Hans: test
+      pt_BR: test
+    placeholder:
+      en_US: test
+      zh_Hans: test
+      pt_BR: test
+    help:
+      en_US: test
+      zh_Hans: test
+      pt_BR: test
+    url: https://athena.puyuan.tech/

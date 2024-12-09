@@ -1,5 +1,5 @@
 import os
-
+import requests
 from ._client import SyncAPIClient
 from .types.chat import ChatResponse, MessageType
 
@@ -48,6 +48,7 @@ class AthenaClient:
         kb_ids: list[str] = [],
         is_multiple_project_query: bool = False,
         is_qa_query: bool = True,
+        send_url: str = None,
     ):
         generation = {"recall": [], "text": ""}
         for t in self.stream(
@@ -59,8 +60,22 @@ class AthenaClient:
             is_multiple_project_query=is_multiple_project_query,
             is_qa_query=is_qa_query,
         ):
+            try:
+                if send_url:
+                    requests.post(send_url, json={
+                        'action': 'athena',
+                        'data': t.dict()
+                    })
+            except Exception as e:
+                pass
             if t.msg_type == MessageType.RETRIEVAL:
                 generation["recall"].extend(t.data)
             elif t.msg_type == MessageType.GENERATION:
                 generation["text"] = generation.get("text", "") + t.data
+        try:
+            if send_url:
+                end_json = {'action': 'end'}
+                requests.post(send_url, json=end_json)
+        except Exception as e:
+            pass
         return generation

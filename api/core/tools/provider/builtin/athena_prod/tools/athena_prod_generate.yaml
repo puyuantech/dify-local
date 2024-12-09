@@ -1,17 +1,17 @@
 identity:
-  name: Athena Generate
-  author: Hangxing Wei
+  name: Athena_prod Generate
+  author: Yuhang
   label:
-    en_US: Athena Generate
-    zh_Hans: 调用 Athena APP 生成
-    pt_BR: Athena Generate
+    en_US: Athena_prod Generate
+    zh_Hans: 调用 Athena_prod APP 生成
+    pt_BR: Athena_prod Generate
   icon: icon.png
 description:
   human:
-    en_US: Generate using athena Application.
-    zh_Hans: 调用 Athena APP 生成内容。
-    pt_BR: Generate using athena Application.
-  llm: Generate using athena Application.
+    en_US: Generate using Athena_prod Application.
+    zh_Hans: 调用 Athena_prod APP 生成内容。
+    pt_BR: Generate using Athena_prod Application.
+  llm: Generate using Athena_prod Application.
 parameters:
   - name: app_id
     type: string
