@@ -69,6 +69,15 @@ class EndStreamGeneratorRouter:
                 ):
                     value_selectors.append(variable_selector.value_selector)
 
+                # Mark: When developing a tool that generates a stream, add the following condition.
+                # Ask tenghan@puyuan.tech for more details.
+                if (
+                    variable_selector.value_selector not in value_selectors
+                    and node.get("data", {}).get("tool_name") == "athena_generate"
+                    and bool(node.get("data", {}).get("tool_configurations", {}).get("stream"))
+                ):
+                    value_selectors.append(variable_selector.value_selector)
+
         return value_selectors
 
     @classmethod
