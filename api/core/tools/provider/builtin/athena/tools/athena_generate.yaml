@@ -1,0 +1,101 @@
+identity:
+  name: athena_generate
+  author: Hangxing Wei & Yuhang Tu
+  label:
+    en_US: Athena generate
+    zh_Hans: Athena生成
+    pt_BR: Athena generate
+  icon: icon.png
+description:
+  human:
+    en_US: Generate using Athena Application.
+    zh_Hans: 调用 Athena APP 生成内容。
+    pt_BR: Generate using Athena Application.
+  llm: Generate using Athena Application.
+parameters:
+  - name: app_id
+    type: string
+    required: true
+    label:
+      en_US: APP ID
+      zh_Hans: APP ID
+      pt_BR: APP ID
+    human_description:
+      en_US: APP ID from athena
+      zh_Hans: APP ID from athena
+      pt_BR: APP ID from athena
+    llm_description: APP ID
+    form: form
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query
+      zh_Hans: Query
+      pt_BR: Query
+    human_description:
+      en_US: Query
+      zh_Hans: Query
+      pt_BR: Query
+    llm_description: Query
+    form: form
+  - name: history
+    type: string
+    required: false
+    label:
+      en_US: History
+      zh_Hans: History
+      pt_BR: History
+    human_description:
+      en_US: 'A Json format string. For example: ```[{"role": "system", "You are an assistant."}, {"role": "user", "Who are you?"}]```'
+      zh_Hans: 'A Json format string. For example: ```[{"role": "system", "You are an assistant."}, {"role": "user", "Who are you?"}]```'
+      pt_BR: 'A Json format string. For example: ```[{"role": "system", "You are an assistant."}, {"role": "user", "Who are you?"}]```'
+    form: form
+  - name: kb_ids
+    type: string
+    required: false
+    label:
+      en_US: Knowledge Base IDs
+      zh_Hans: Knowledge Base IDs
+      pt_BR: Knowledge Base IDs
+    human_description:
+      en_US: 'A Json format string. For example: ```["kb_id_1", "kb_id_2"]```'
+      zh_Hans: 'A Json format string. For example: ```["kb_id_1", "kb_id_2"]```'
+      pt_BR: 'A Json format string. For example: ```["kb_id_1", "kb_id_2"]```'
+    form: form
+  - name: is_multiple_project_query
+    type: boolean
+    default: false
+    label:
+      en_US: is_multiple_project_query
+      zh_Hans: is_multiple_project_query
+      pt_BR: is_multiple_project_query
+    human_description:
+      en_US: is_multiple_project_query
+      zh_Hans: is_multiple_project_query
+      pt_BR: is_multiple_project_query
+    form: form
+  - name: is_qa_query
+    type: boolean
+    default: false
+    label:
+      en_US: is_qa_query
+      zh_Hans: is_qa_query
+      pt_BR: is_qa_query
+    human_description:
+      en_US: is_qa_query
+      zh_Hans: is_qa_query
+      pt_BR: is_qa_query
+    form: form
+  - name: stream
+    type: boolean
+    default: true
+    label:
+      en_US: Whether use streaming response
+      zh_Hans: 是否流式返回
+      pt_BR: Whether use streaming response
+    human_description:
+      en_US: Whether use streaming response
+      zh_Hans: 使用流式输出时，节点运行时输出原始Athena stream
+      pt_BR: Whether use streaming response
+    form: form
