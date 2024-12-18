@@ -183,6 +183,7 @@ const AppPublisher = ({
           </div>
           <div className='p-4 pt-3 border-t-[0.5px] border-t-black/5'>
             <SuggestedAction disabled={!publishedAt} link={appURL} icon={<PlayCircle />}>{t('workflow.common.runApp')}</SuggestedAction>
+            <SuggestedAction disabled={!publishedAt} link={`https://athena-prod.puyuan.tech/chat/?aiflow_app_id=${appDetail?.id}`} icon={<PlayCircle />}>Launch Athena Chat</SuggestedAction>
             {appDetail?.mode === 'workflow'
               ? (
                 <SuggestedAction
