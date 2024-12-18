@@ -45,3 +45,4 @@ parameters:
       zh_Hans: 输出格式
       pt_BR: output format
     llm_description: output format
+    form: form

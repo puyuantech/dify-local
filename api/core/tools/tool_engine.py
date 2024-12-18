@@ -159,6 +159,45 @@ class ToolEngine:
             raise e
 
     @staticmethod
+    def workflow_invoke_stream(
+        tool: Tool,
+        tool_parameters: Mapping[str, Any],
+        user_id: str,
+        workflow_tool_callback: DifyWorkflowCallbackHandler,
+        workflow_call_depth: int,
+        thread_pool_id: Optional[str] = None,
+    ) -> list[ToolInvokeMessage]:
+        """
+        Workflow invokes the tool with the given arguments.
+        """
+        try:
+            # hit the callback handler
+            assert tool.identity is not None
+            workflow_tool_callback.on_tool_start(tool_name=tool.identity.name, tool_inputs=tool_parameters)
+
+            if isinstance(tool, WorkflowTool):
+                tool.workflow_call_depth = workflow_call_depth + 1
+                tool.thread_pool_id = thread_pool_id
+
+            if tool.runtime and tool.runtime.runtime_parameters:
+                tool_parameters = {**tool.runtime.runtime_parameters, **tool_parameters}
+
+            responses = tool.stream(user_id=user_id, tool_parameters=tool_parameters)
+
+            for response, stream_end in responses:
+                if stream_end:
+                    workflow_tool_callback.on_tool_end(
+                        tool_name=tool.identity.name,
+                        tool_inputs=tool_parameters,
+                        tool_outputs=response,
+                    )
+                yield response, stream_end
+        except Exception as e:
+            workflow_tool_callback.on_tool_error(e)
+            raise e
+
+
+    @staticmethod
     def _invoke(tool: Tool, tool_parameters: dict, user_id: str) -> tuple[ToolInvokeMeta, list[ToolInvokeMessage]]:
         """
         Invoke the tool with the given arguments.

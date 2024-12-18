@@ -266,7 +266,7 @@ class LLMNode(BaseNode[LLMNodeData]):
             text = result.delta.message.content
             full_text += text
 
-            yield RunStreamChunkEvent(chunk_content=text, from_variable_selector=[self.node_id, "text"])
+            yield RunStreamChunkEvent(chunk_content='llm___' + text, from_variable_selector=[self.node_id, "text"])
 
             if not model:
                 model = result.model

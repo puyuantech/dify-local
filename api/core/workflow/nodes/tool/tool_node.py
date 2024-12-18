@@ -1,6 +1,6 @@
+import json
 from collections.abc import Mapping, Sequence
-from typing import Any
-
+from typing import Any, Union
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ from core.tools.tool_engine import ToolEngine
 from core.tools.tool_manager import ToolManager
 from core.tools.utils.message_transformer import ToolFileMessageTransformer
 from core.workflow.entities.node_entities import NodeRunMetadataKey, NodeRunResult
+from core.workflow.nodes.event import RunCompletedEvent, RunStreamChunkEvent
 from core.workflow.entities.variable_pool import VariablePool
 from core.workflow.nodes.base import BaseNode
 from core.workflow.nodes.enums import NodeType
@@ -49,13 +50,15 @@ class ToolNode(BaseNode[ToolNodeData]):
                 self.tenant_id, self.app_id, self.node_id, self.node_data, self.invoke_from
             )
         except ToolNodeError as e:
-            return NodeRunResult(
-                status=WorkflowNodeExecutionStatus.FAILED,
-                inputs={},
-                metadata={
-                    NodeRunMetadataKey.TOOL_INFO: tool_info,
-                },
-                error=f"Failed to get tool runtime: {str(e)}",
+            yield RunCompletedEvent(
+                run_result=NodeRunResult(
+                    status=WorkflowNodeExecutionStatus.FAILED,
+                    inputs={},
+                    metadata={
+                        NodeRunMetadataKey.TOOL_INFO: tool_info,
+                    },
+                    error=f"Failed to get tool runtime: {str(e)}",
+                )
             )
 
         # get parameters
@@ -73,39 +76,74 @@ class ToolNode(BaseNode[ToolNodeData]):
         )
 
         try:
-            messages = ToolEngine.workflow_invoke(
-                tool=tool_runtime,
-                tool_parameters=parameters,
-                user_id=self.user_id,
-                workflow_tool_callback=DifyWorkflowCallbackHandler(),
-                workflow_call_depth=self.workflow_call_depth,
-                thread_pool_id=self.thread_pool_id,
-            )
+            if not hasattr(tool_runtime, 'stream'):
+                messages = ToolEngine.workflow_invoke(
+                    tool=tool_runtime,
+                    tool_parameters=parameters,
+                    user_id=self.user_id,
+                    workflow_tool_callback=DifyWorkflowCallbackHandler(),
+                    workflow_call_depth=self.workflow_call_depth,
+                    thread_pool_id=self.thread_pool_id,
+                )
+                # convert tool messages
+                plain_text, files, json_data = self._convert_tool_messages(messages)
+                yield RunCompletedEvent(
+                    run_result=NodeRunResult(
+                        status=WorkflowNodeExecutionStatus.SUCCEEDED,
+                        outputs={
+                            "text": plain_text,
+                            "files": files,
+                            "json": json_data,
+                        },
+                        metadata={
+                            NodeRunMetadataKey.TOOL_INFO: tool_info,
+                        },
+                        inputs=parameters_for_log,
+                    )
+                )
+            else:
+                messages = ToolEngine.workflow_invoke_stream(
+                    tool=tool_runtime,
+                    tool_parameters=parameters,
+                    user_id=self.user_id,
+                    workflow_tool_callback=DifyWorkflowCallbackHandler(),
+                    workflow_call_depth=self.workflow_call_depth,
+                    thread_pool_id=self.thread_pool_id,
+                )
+
+                for event_data, stream_end in messages:
+                    if stream_end:
+                        yield RunCompletedEvent(
+                            run_result=NodeRunResult(
+                                status=WorkflowNodeExecutionStatus.SUCCEEDED,
+                                outputs={
+                                    "text": event_data["text"],
+                                    "files": [],
+                                    "json": event_data,
+                                },
+                                metadata={
+                                    NodeRunMetadataKey.TOOL_INFO: tool_info,
+                                },
+                                inputs=parameters_for_log,
+                            )
+                        )
+                    else:
+                        yield RunStreamChunkEvent(
+                            chunk_content='athena' + json.dumps(event_data),
+                            from_variable_selector=[self.node_id, "text"]
+                        )
+
         except ToolNodeError as e:
-            return NodeRunResult(
-                status=WorkflowNodeExecutionStatus.FAILED,
-                inputs=parameters_for_log,
-                metadata={
-                    NodeRunMetadataKey.TOOL_INFO: tool_info,
-                },
-                error=f"Failed to invoke tool: {str(e)}",
+            yield RunCompletedEvent(
+                run_result=NodeRunResult(
+                    status=WorkflowNodeExecutionStatus.FAILED,
+                    inputs=parameters_for_log,
+                    metadata={
+                        NodeRunMetadataKey.TOOL_INFO: tool_info,
+                    },
+                    error=f"Failed to invoke tool: {str(e)}",
+                )
             )
-
-        # convert tool messages
-        plain_text, files, json = self._convert_tool_messages(messages)
-
-        return NodeRunResult(
-            status=WorkflowNodeExecutionStatus.SUCCEEDED,
-            outputs={
-                "text": plain_text,
-                "files": files,
-                "json": json,
-            },
-            metadata={
-                NodeRunMetadataKey.TOOL_INFO: tool_info,
-            },
-            inputs=parameters_for_log,
-        )
 
     def _generate_parameters(
         self,

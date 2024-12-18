@@ -1,5 +1,5 @@
 identity:
-  author: Hangxing Wei
+  author: Puyuan tech
   name: athena
   label:
     en_US: Athena
@@ -25,23 +25,30 @@ credentials_for_provider:
       zh_Hans: 请输入你的 Athena API KEY
       pt_BR: Please input your Athena API KEY
     help:
-      en_US: Get your Athena API KEY from Athena
-      zh_Hans: 从 Athena 获取您的 Athena API KEY
-      pt_BR: Get your Athena API KEY from Athena
-    url: https://athena.puyuan.tech/
+      en_US: Ask tenghan@puyuan.tech for more details.
+      zh_Hans: Ask tenghan@puyuan.tech for more details.
+      pt_BR: Ask tenghan@puyuan.tech for more details.
   base_url:
-    type: secret-input
+    type: select
     required: true
+    options:
+      - value: http://localhost:15000
+        label:
+          en_US: For https://athena-prod.puyuan.tech/
+          zh_Hans: Athena Prod(https://athena-prod.puyuan.tech/)
+      - value: http://localhost:15500
+        label:
+          en_US: For https://athena.puyuan.tech/
+          zh_Hans: Athena(https://athena.puyuan.tech/)
     label:
       en_US: Athena Base URL
       zh_Hans: Athena Base URL
       pt_BR: Athena Base URL
     placeholder:
       en_US: Please input your Athena Base URL
-      zh_Hans: 请输入你的 Athena Base URL
+      zh_Hans: 使用哪个环境的Athena
       pt_BR: Please input your Athena Base URL
     help:
-      en_US: Get your Athena Base URL from Athena
-      zh_Hans: 从 Athena 获取您的 Athena Base URL
-      pt_BR: Get your Athena Base URL from Athena
-    url: https://athena.puyuan.tech/
+      en_US: Ask tenghan@puyuan.tech for more details.
+      zh_Hans: Ask tenghan@puyuan.tech for more details.
+      pt_BR: Ask tenghan@puyuan.tech for more details.
