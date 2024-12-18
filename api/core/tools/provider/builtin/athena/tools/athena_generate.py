@@ -6,7 +6,6 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class AthenaGenerate(BuiltinTool):
-
     def get_generator(self, user_id: str, tool_parameters: dict[str, Any]):
         app_id, query = tool_parameters.get("app_id"), tool_parameters.get("query")
 

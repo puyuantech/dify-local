@@ -1,0 +1,104 @@
+identity:
+  name: Athena_prod Generate
+  author: Yuhang
+  label:
+    en_US: Athena_prod Generate
+    zh_Hans: 调用 Athena_prod APP 生成
+    pt_BR: Athena_prod Generate
+  icon: icon.png
+description:
+  human:
+    en_US: Generate using Athena_prod Application.
+    zh_Hans: 调用 Athena_prod APP 生成内容。
+    pt_BR: Generate using Athena_prod Application.
+  llm: Generate using Athena_prod Application.
+parameters:
+  - name: app_id
+    type: string
+    required: true
+    label:
+      en_US: APP ID
+      zh_Hans: APP ID
+      pt_BR: APP ID
+    human_description:
+      en_US: APP ID
+      zh_Hans: APP ID
+      pt_BR: APP ID
+    llm_description: APP ID
+    form: llm
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query
+      zh_Hans: Query
+      pt_BR: Query
+    human_description:
+      en_US: Query
+      zh_Hans: Query
+      pt_BR: Query
+    llm_description: Query
+    form: llm
+  - name: send_url
+    type: string
+    required: false
+    label:
+      en_US: Send_url
+      zh_Hans: Send_url
+      pt_BR: Send_url
+    human_description:
+      en_US: Send_url
+      zh_Hans: Send_url
+      pt_BR: Send_url
+    llm_description: Send_url
+    form: llm
+  - name: history
+    type: string
+    required: false
+    label:
+      en_US: History
+      zh_Hans: History
+      pt_BR: History
+    human_description:
+      en_US: History
+      zh_Hans: History
+      pt_BR: History
+    llm_description: History
+    form: llm
+  - name: kb_ids
+    type: string
+    required: false
+    label:
+      en_US: Knowledge Base IDs
+      zh_Hans: Knowledge Base IDs
+      pt_BR: Knowledge Base IDs
+    human_description:
+      en_US: Knowledge Base IDs
+      zh_Hans: Knowledge Base IDs
+      pt_BR: Knowledge Base IDs
+    llm_description: Knowledge Base IDs
+    form: llm
+  - name: is_multiple_project_query
+    type: boolean
+    required: false
+    label:
+      en_US: is_multiple_project_query
+      zh_Hans: is_multiple_project_query
+      pt_BR: is_multiple_project_query
+    human_description:
+      en_US: is_multiple_project_query
+      zh_Hans: is_multiple_project_query
+      pt_BR: is_multiple_project_query
+    form: form
+  - name: is_qa_query
+    type: boolean
+    required: false
+    label:
+      en_US: is_qa_query
+      zh_Hans: is_qa_query
+      pt_BR: is_qa_query
+    human_description:
+      en_US: is_qa_query
+      zh_Hans: is_qa_query
+      pt_BR: is_qa_query
+    form: form

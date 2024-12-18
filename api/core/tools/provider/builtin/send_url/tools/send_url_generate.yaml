@@ -1,0 +1,37 @@
+identity:
+  name: Send URL Generate
+  author: Yuhang Tu
+  label:
+    en_US: Send URL Generate
+    zh_Hans: 发送URL生成
+    pt_BR: Send URL Generate
+  icon: icon.png
+description:
+  human:
+    en_US: Generate using send URL.
+    zh_Hans: 使用发送URL生成内容。
+    pt_BR: Generate using send URL.
+  llm: Generate using send URL.
+parameters:
+  - name: url
+    type: string 
+    required: true
+    label:
+      en_US: url
+      zh_Hans: url 
+      pt_BR: url
+    llm_description: APP ID
+    form: llm
+  - name: data
+    type: string
+    required: true
+    label:
+      en_US: data
+      zh_Hans: data
+      pt_BR: data
+    human_description:
+      en_US: data
+      zh_Hans: data
+      pt_BR: data
+    llm_description: Query
+    form: llm

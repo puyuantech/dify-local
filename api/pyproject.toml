@@ -289,6 +289,8 @@ pytest-mock = "~3.14.0"
 # [ Lint ] dependency group
 # Required for code style linting
 ############################################################
+ipykernel = "^6.29.5"
+
 [tool.poetry.group.lint]
 optional = true
 [tool.poetry.group.lint.dependencies]
