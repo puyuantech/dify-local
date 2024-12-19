@@ -1,0 +1,14 @@
+identity:
+  author: Puyuan tech
+  name: puyuan
+  label:
+    en_US: a Puyuan tech
+    zh_Hans: a 北京璞元科技有限公司
+    pt_BR: a Puyuan tech
+  description:
+    en_US: Puyuan tech
+    zh_Hans: 北京璞元科技有限公司
+    pt_BR: Athena Connect
+  icon: icon.png
+  tags:
+    - productivity
