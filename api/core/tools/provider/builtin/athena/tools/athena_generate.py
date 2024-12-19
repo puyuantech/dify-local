@@ -2,11 +2,14 @@ import json
 from typing import Any
 
 from athena_stream import AthenaClient
+from athena_stream.types.chat import MessageType
 from core.tools.tool.builtin_tool import BuiltinTool
 
 
 class AthenaGenerate(BuiltinTool):
-    def get_generator(self, user_id: str, tool_parameters: dict[str, Any]):
+    def _invoke(
+        self, user_id: str, tool_parameters: dict[str, Any]
+    ):
         app_id, query = tool_parameters.get("app_id"), tool_parameters.get("query")
 
         assert app_id and query, "app_id and query are required"
@@ -25,19 +28,26 @@ class AthenaGenerate(BuiltinTool):
 
         client = AthenaClient(base_url=credentials["base_url"], api_key=credentials["api_key"])
 
-        return client.generate(
+        recall = []
+        full_text = ''
+
+        yield self.create_text_message('athena')
+
+        for t in client.stream(
             app_id=app_id,
             query=query,
-            history=history,
-            kb_ids=kb_ids,
+            history=history or [],
+            kb_ids=kb_ids or [],
             is_multiple_project_query=bool(tool_parameters.get("is_multiple_project_query", 0)),
             is_qa_query=bool(tool_parameters.get("is_qa_query", 0))
-        )
+        ):
+            if t.msg_type == MessageType.RETRIEVAL:
+                recall.extend(t.data)
+            elif t.msg_type == MessageType.GENERATION:
+                full_text += t.data
+            yield self.create_text_message("athena" + json.dumps(t.model_dump()))
 
-    def _invoke(
-        self, user_id: str, tool_parameters: dict[str, Any]
-    ):
-        pass
-
-    def stream(self, user_id: str, tool_parameters: dict[str, Any]):
-        yield from self.get_generator(user_id, tool_parameters)
+        return [
+            self.create_json_message({"recall": recall}),
+            self.create_text_message(full_text),
+        ]

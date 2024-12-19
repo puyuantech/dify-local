@@ -37,33 +37,3 @@ class AthenaClient:
             cast_to=ChatResponse,
             options={"stream_prefix": ""},
         )
-
-    def generate(
-        self,
-        app_id: str,
-        query: str,
-        history: list[dict] = None,
-        kb_ids: list[str] = None,
-        is_multiple_project_query: bool = False,
-        is_qa_query: bool = False,
-    ):
-        history = history or []
-        kb_ids = kb_ids or []
-
-        generation = {"recall": [], "text": ""}
-        for t in self.stream(
-            app_id=app_id,
-            query=query,
-            history=history,
-            kb_ids=kb_ids,
-            verbose=3,
-            is_multiple_project_query=is_multiple_project_query,
-            is_qa_query=is_qa_query,
-        ):
-            if t.msg_type == MessageType.RETRIEVAL:
-                generation["recall"].extend(t.data)
-            elif t.msg_type == MessageType.GENERATION:
-                generation["text"] += t.data
-            yield t.model_dump(), False
-
-        yield generation, True

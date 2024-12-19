@@ -25,7 +25,7 @@ parameters:
       zh_Hans: APP ID from athena
       pt_BR: APP ID from athena
     llm_description: APP ID
-    form: form
+    form: llm
   - name: query
     type: string
     required: true
@@ -38,7 +38,7 @@ parameters:
       zh_Hans: Query
       pt_BR: Query
     llm_description: Query
-    form: form
+    form: llm
   - name: history
     type: string
     required: false
@@ -48,9 +48,9 @@ parameters:
       pt_BR: History
     human_description:
       en_US: 'A Json format string. For example: ```[{"role": "system", "You are an assistant."}, {"role": "user", "Who are you?"}]```'
-      zh_Hans: 'A Json format string. For example: ```[{"role": "system", "You are an assistant."}, {"role": "user", "Who are you?"}]```'
+      zh_Hans: 'Json格式的字符串，例如：```[{"role": "system", "You are an assistant."}, {"role": "user", "Who are you?"}]```'
       pt_BR: 'A Json format string. For example: ```[{"role": "system", "You are an assistant."}, {"role": "user", "Who are you?"}]```'
-    form: form
+    form: llm
   - name: kb_ids
     type: string
     required: false
@@ -60,9 +60,9 @@ parameters:
       pt_BR: Knowledge Base IDs
     human_description:
       en_US: 'A Json format string. For example: ```["kb_id_1", "kb_id_2"]```'
-      zh_Hans: 'A Json format string. For example: ```["kb_id_1", "kb_id_2"]```'
+      zh_Hans: 'Json格式的字符串，例如：```["kb_id_1", "kb_id_2"]```'
       pt_BR: 'A Json format string. For example: ```["kb_id_1", "kb_id_2"]```'
-    form: form
+    form: llm
   - name: is_multiple_project_query
     type: boolean
     default: false
@@ -91,11 +91,11 @@ parameters:
     type: boolean
     default: true
     label:
-      en_US: Whether use streaming response
-      zh_Hans: 是否流式返回
-      pt_BR: Whether use streaming response
+      en_US: Whether streaming response to frontend
+      zh_Hans: 是否作为输出节点
+      pt_BR: Whether streaming response to frontend
     human_description:
-      en_US: Whether use streaming response
-      zh_Hans: 使用流式输出时，节点运行时输出原始Athena stream
-      pt_BR: Whether use streaming response
+      en_US: Whether streaming response to frontend
+      zh_Hans: 当作为输出节点，节点运行时输出原始Athena stream
+      pt_BR: Whether streaming response to frontend
     form: form
