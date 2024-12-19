@@ -1,0 +1,44 @@
+identity:
+  name: str2json
+  author: moon
+  label:
+    en_US: Json String to Object
+    zh_Hans: Json字符串转换Object
+description:
+  human:
+    en_US: Convert JSON string to list or object
+    zh_Hans: 将JSON字符串转换为列表或对象
+  llm: A tool used to convert JSON string to list or object format.
+parameters:
+  - name: json_string
+    type: string
+    required: true
+    label:
+      en_US: JSON String
+      zh_Hans: JSON字符串
+    human_description:
+      en_US: The JSON string to be converted
+      zh_Hans: 需要转换的JSON字符串
+    llm_description: The JSON format string that needs to be converted to list or object.
+    form: llm
+  - name: target_type
+    type: select
+    required: true
+    label:
+      en_US: Target Type
+      zh_Hans: 目标类型
+    options:
+      - value: list
+        label:
+          en_US: List
+          zh_Hans: 列表
+      - value: object  
+        label:
+          en_US: Object
+          zh_Hans: 对象
+    default: object
+    human_description:
+      en_US: The type to convert to (list or object)
+      zh_Hans: 要转换的目标类型（列表或对象）
+    llm_description: The target type for conversion, either list or object format.
+    form: form
