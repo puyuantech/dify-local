@@ -1,9 +1,9 @@
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Iterable
 from copy import deepcopy
 from datetime import UTC, datetime
 from mimetypes import guess_type
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Iterator
 
 from yarl import URL
 
@@ -129,7 +129,7 @@ class ToolEngine:
         workflow_tool_callback: DifyWorkflowCallbackHandler,
         workflow_call_depth: int,
         thread_pool_id: Optional[str] = None,
-    ) -> list[ToolInvokeMessage]:
+    ) -> Union[list[ToolInvokeMessage], Iterator[ToolInvokeMessage]]:
         """
         Workflow invokes the tool with the given arguments.
         """
@@ -145,6 +145,15 @@ class ToolEngine:
             if tool.runtime and tool.runtime.runtime_parameters:
                 tool_parameters = {**tool.runtime.runtime_parameters, **tool_parameters}
             response = tool.invoke(user_id=user_id, tool_parameters=tool_parameters)
+
+            if isinstance(response, Iterable):
+                try:
+                    while True:
+                        yield next(response)
+                except StopIteration as e:
+                    response = e.value
+                except TypeError:
+                    pass
 
             # hit the callback handler
             workflow_tool_callback.on_tool_end(

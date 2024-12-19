@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
+from collections.abc import Mapping, Iterable
 from copy import deepcopy
 from enum import Enum, StrEnum
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union, Iterator
 
 from pydantic import BaseModel, ConfigDict, field_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -197,7 +197,7 @@ class Tool(BaseModel, ABC):
 
         return result
 
-    def invoke(self, user_id: str, tool_parameters: Mapping[str, Any]) -> list[ToolInvokeMessage]:
+    def invoke(self, user_id: str, tool_parameters: Mapping[str, Any]) -> Union[list[ToolInvokeMessage], Iterator[ToolInvokeMessage]]:
         # update tool_parameters
         # TODO: Fix type error.
         if self.runtime.runtime_parameters:
@@ -210,6 +210,15 @@ class Tool(BaseModel, ABC):
             user_id=user_id,
             tool_parameters=tool_parameters,
         )
+
+        if isinstance(result, Iterable):
+            try:
+                while True:
+                    yield next(result)
+            except StopIteration as e:
+                result = e.value
+            except TypeError:
+                pass
 
         if not isinstance(result, list):
             result = [result]
@@ -231,7 +240,7 @@ class Tool(BaseModel, ABC):
     @abstractmethod
     def _invoke(
         self, user_id: str, tool_parameters: dict[str, Any]
-    ) -> Union[ToolInvokeMessage, list[ToolInvokeMessage]]:
+    ) -> Union[ToolInvokeMessage, list[ToolInvokeMessage], Iterator[ToolInvokeMessage]]:
         pass
 
     def validate_credentials(self, credentials: dict[str, Any], parameters: dict[str, Any]) -> None:

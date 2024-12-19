@@ -1,6 +1,5 @@
-import json
-from collections.abc import Mapping, Sequence
-from typing import Any, Union
+from collections.abc import Mapping, Sequence, Iterable
+from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -76,62 +75,48 @@ class ToolNode(BaseNode[ToolNodeData]):
         )
 
         try:
-            if not hasattr(tool_runtime, 'stream'):
-                messages = ToolEngine.workflow_invoke(
-                    tool=tool_runtime,
-                    tool_parameters=parameters,
-                    user_id=self.user_id,
-                    workflow_tool_callback=DifyWorkflowCallbackHandler(),
-                    workflow_call_depth=self.workflow_call_depth,
-                    thread_pool_id=self.thread_pool_id,
-                )
-                # convert tool messages
-                plain_text, files, json_data = self._convert_tool_messages(messages)
-                yield RunCompletedEvent(
-                    run_result=NodeRunResult(
-                        status=WorkflowNodeExecutionStatus.SUCCEEDED,
-                        outputs={
-                            "text": plain_text,
-                            "files": files,
-                            "json": json_data,
-                        },
-                        metadata={
-                            NodeRunMetadataKey.TOOL_INFO: tool_info,
-                        },
-                        inputs=parameters_for_log,
-                    )
-                )
-            else:
-                messages = ToolEngine.workflow_invoke_stream(
-                    tool=tool_runtime,
-                    tool_parameters=parameters,
-                    user_id=self.user_id,
-                    workflow_tool_callback=DifyWorkflowCallbackHandler(),
-                    workflow_call_depth=self.workflow_call_depth,
-                    thread_pool_id=self.thread_pool_id,
-                )
+            messages = ToolEngine.workflow_invoke(
+                tool=tool_runtime,
+                tool_parameters=parameters,
+                user_id=self.user_id,
+                workflow_tool_callback=DifyWorkflowCallbackHandler(),
+                workflow_call_depth=self.workflow_call_depth,
+                thread_pool_id=self.thread_pool_id,
+            )
 
-                for event_data, stream_end in messages:
-                    if stream_end:
-                        yield RunCompletedEvent(
-                            run_result=NodeRunResult(
-                                status=WorkflowNodeExecutionStatus.SUCCEEDED,
-                                outputs={
-                                    "text": event_data["text"],
-                                    "files": [],
-                                    "json": event_data,
-                                },
-                                metadata={
-                                    NodeRunMetadataKey.TOOL_INFO: tool_info,
-                                },
-                                inputs=parameters_for_log,
-                            )
-                        )
-                    else:
+            if isinstance(messages, Iterable):
+                try:
+                    while True:
+                        message: ToolInvokeMessage = next(messages)
+                        if message.type == ToolInvokeMessage.MessageType.TEXT:
+                            text = message.message
+                        else:
+                            text = "Unsupported message type for streaming"
+
                         yield RunStreamChunkEvent(
-                            chunk_content='athena' + json.dumps(event_data),
+                            chunk_content=text,
                             from_variable_selector=[self.node_id, "text"]
                         )
+                except StopIteration as e:
+                    messages = e.value
+
+            # convert tool messages
+            plain_text, files, json_data = self._convert_tool_messages(messages)
+
+            yield RunCompletedEvent(
+                run_result=NodeRunResult(
+                    status=WorkflowNodeExecutionStatus.SUCCEEDED,
+                    outputs={
+                        "text": plain_text,
+                        "files": files,
+                        "json": json_data,
+                    },
+                    metadata={
+                        NodeRunMetadataKey.TOOL_INFO: tool_info,
+                    },
+                    inputs=parameters_for_log,
+                )
+            )
 
         except ToolNodeError as e:
             yield RunCompletedEvent(
