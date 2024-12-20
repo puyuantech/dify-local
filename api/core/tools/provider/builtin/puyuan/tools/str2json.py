@@ -10,7 +10,7 @@ from core.tools.tool.builtin_tool import BuiltinTool
 
 def extract_json_list_from_json_md(input_str) -> str | None:
     match = re.search(
-        r'(?:```)?(?:json)?\s*(\[\s*(?:\d+|"[^"]*"|\[[^]]*]|{[\s\S]*?}|null|true|false)(?:,\s*(?:\d+|"[^"]*"|\[[^]]*]|{[\s\S]*?}|null|true|false))*\s*])\s*(?:```)?',
+        r'(?:```)?(?:json)?\s*(\[\s*(?:\d+|"[^"]*"|\[[^]]*]|{[\s\S]*?}|null|true|false)?(?:,\s*(?:\d+|"[^"]*"|\[[^]]*]|{[\s\S]*?}|null|true|false))*\s*])\s*(?:```)?',
         input_str, re.DOTALL)
     if match:
         return match.group(1)
