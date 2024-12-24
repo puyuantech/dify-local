@@ -1,7 +1,7 @@
-model: gpt-4-1106-preview
+model: glm-4-0520
 label:
-  zh_Hans: gpt-4-1106-preview
-  en_US: gpt-4-1106-preview
+  zh_Hans: glm-4-0520
+  en_US: glm-4-0520
 model_type: llm
 features:
   - multi-tool-call
@@ -23,11 +23,11 @@ parameter_rules:
     use_template: max_tokens
     default: 2048
     min: 1
-    max: 4096
+    max: 128000
   - name: response_format
     use_template: response_format
 pricing:
-  input: "0.01"
-  output: "0.03"
+  input: "0.1"
+  output: "0.1"
   unit: "0.001"
-  currency: USD
+  currency: CNY
