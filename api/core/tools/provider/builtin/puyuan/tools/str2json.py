@@ -1,5 +1,5 @@
 import re
-import json
+import orjson
 from typing import Any
 import regex
 
@@ -14,14 +14,21 @@ def extract_json_list_from_json_md(input_str) -> str | None:
         input_str, re.DOTALL)
     if match:
         return match.group(1)
-    raise Exception("未提取到有效的JSON字符串，请检查输入是否包含列表")
+    raise ValueError("未提取到有效的JSON字符串，请确认输入包含列表")
 
 
 def extract_json_dict_from_json_md(input_str) -> str | None:
     match = regex.search(r'(?:```)?(?:json)?\s*({(?:[^{}]|(?R))*})\s*(?:```)?', input_str, regex.DOTALL)
     if match:
         return match.group(1)
-    raise Exception("未提取到有效的JSON字符串，请检查输入是否包含Json对象")
+    raise ValueError("未提取到有效的JSON字符串，请确认输入包含Json对象")
+
+
+def loads_json(json_str: str) -> dict | list:
+    try:
+        return orjson.loads(json_str)
+    except Exception as e:
+        raise ValueError(f"JSON字符串解析失败:\n{json_str}\n{e}")
 
 
 class Str2JsonTool(BuiltinTool):
@@ -40,6 +47,7 @@ class Str2JsonTool(BuiltinTool):
 
         if target_type == "list":
             json_string = extract_json_list_from_json_md(json_string)
-            return self.create_json_message({'list': json.loads(json_string)})
+            return self.create_json_message({'list': loads_json(json_string)})
         else:
-            return self.create_json_message(json.loads(json_string))
+            json_string = extract_json_dict_from_json_md(json_string)
+            return self.create_json_message(loads_json(json_string))
