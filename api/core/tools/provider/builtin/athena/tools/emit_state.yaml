@@ -1,0 +1,41 @@
+identity:
+  name: emit_state
+  author: tenghan@puyuan.tech
+  label:
+    en_US: Athena Emit State
+    zh_Hans: Athena状态输出
+    pt_BR: Athena Emit State
+  icon: icon.png
+description:
+  human:
+    en_US: Emit state on Athena chat frontend.
+    zh_Hans: 在 Athena 聊天前端输出状态。
+    pt_BR: Emit state on Athena chat frontend.
+  llm: Emit state on Athena chat frontend.
+parameters:
+  - name: main_state
+    type: string
+    required: false
+    label:
+      en_US: Main State
+      zh_Hans: 主状态
+      pt_BR: Estado Principal
+    human_description:
+      en_US: Main state of Athena
+      zh_Hans: Athena 的主状态
+      pt_BR: Estado principal da Athena
+    llm_description: Main state of Athena
+    form: llm
+  - name: sub_state
+    type: string
+    required: false
+    label:
+      en_US: Sub State
+      zh_Hans: 子状态
+      pt_BR: Estado Sub
+    human_description:
+      en_US: Sub state of Athena
+      zh_Hans: Athena 的子状态
+      pt_BR: Estado sub da Athena
+    llm_description: Sub state of Athena
+    form: llm
