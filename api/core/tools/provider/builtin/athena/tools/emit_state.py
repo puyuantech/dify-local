@@ -15,12 +15,10 @@ class EmitState(BuiltinTool):
 
         response = []
         if main_state:
-            text_message = self.create_text_message(f"emstat:main:{main_state}")
+            text_message = self.create_text_message(main_state)
             response.append(text_message)
-            yield text_message
         if sub_state:
-            text_message = self.create_text_message(f"emstat:sub:{sub_state}")
+            text_message = self.create_text_message(sub_state)
             response.append(text_message)
-            yield text_message
 
         return response
