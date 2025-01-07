@@ -332,6 +332,23 @@ class OAIAPICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
         if not endpoint_url.endswith("/"):
             endpoint_url += "/"
 
+        response_format = model_parameters.get("response_format")
+        if response_format:
+            if response_format == "json_schema":
+                json_schema = model_parameters.get("json_schema")
+                if not json_schema:
+                    raise ValueError("Must define JSON Schema when the response format is json_schema")
+                try:
+                    schema = json.loads(json_schema)
+                except:
+                    raise ValueError(f"not correct json_schema format: {json_schema}")
+                model_parameters.pop("json_schema")
+                model_parameters["response_format"] = {"type": "json_schema", "json_schema": schema}
+            else:
+                model_parameters["response_format"] = {"type": response_format}
+        elif "json_schema" in model_parameters:
+            del model_parameters["json_schema"]
+
         data = {"model": model, "stream": stream, **model_parameters}
 
         completion_type = LLMMode.value_of(credentials["mode"])
@@ -360,7 +377,10 @@ class OAIAPICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                 for tool in tools:
                     formatted_tools.append(helper.dump_model(PromptMessageFunction(function=tool)))
 
-                data["tools"] = formatted_tools
+                if prompt_messages[-1].role.value == "tool":
+                    data["tools"] = None
+                else:
+                    data["tools"] = formatted_tools
 
         if stop:
             data["stop"] = stop
@@ -462,7 +482,7 @@ class OAIAPICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                 # ignore sse comments
                 if chunk.startswith(":"):
                     continue
-                decoded_chunk = chunk.strip().lstrip("data: ").lstrip()
+                decoded_chunk = chunk.strip().removeprefix("data:").lstrip()
                 if decoded_chunk == "[DONE]":  # Some provider returns "data: [DONE]"
                     continue
 
@@ -478,6 +498,10 @@ class OAIAPICompatLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
                         usage=usage,
                     )
                     break
+                # handle the error here. for issue #11629
+                if chunk_json.get("error") and chunk_json.get("choices") is None:
+                    raise ValueError(chunk_json.get("error"))
+
                 if chunk_json:
                     if u := chunk_json.get("usage"):
                         usage = u
