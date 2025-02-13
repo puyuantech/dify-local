@@ -28,6 +28,8 @@
 - chatglm3-32k
 - deepseek-coder-6.7b-instruct
 - deepseek-coder-6.7b-base
+- volcengine/deepseek-r1-250120
+- volcengine/deepseek-v3-241226
 - lingua
 - oneke
 - qwen-14b-chat
