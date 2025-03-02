@@ -1,10 +1,9 @@
 import json
 import time
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Dict, Any
 from urllib.parse import urljoin
 
-import numpy as np
 import requests
 
 from core.entities.embedding_type import EmbeddingInputType
@@ -57,59 +56,24 @@ class ModelHubEmbeddingModel(_CommonOAI_API_Compat, TextEmbeddingModel):
         if not endpoint_url.endswith("/"):
             endpoint_url += "/"
 
-        endpoint_url = urljoin(endpoint_url, "embeddings")
+        endpoint_url = endpoint_url.replace("v1/", "")
 
-        extra_model_kwargs = {}
+        endpoint_url = urljoin(endpoint_url, "embedding")
+
+        payload: Dict[str, Any] = {"content": texts, "model": model, }
+
         if user:
-            extra_model_kwargs["user"] = user
+            payload["user"] = user
 
-        extra_model_kwargs["encoding_format"] = "float"
+        response = requests.post(endpoint_url, headers=headers, json=payload, timeout=(10, 300))
+        response.raise_for_status()
+        response_data = response.json()
 
-        # get model properties
-        context_size = self._get_context_size(model, credentials)
-        max_chunks = self._get_max_chunks(model, credentials)
+        used_tokens = response_data.get("cost", {}).get("total_tokens", 0)
 
-        inputs = []
-        indices = []
-        used_tokens = 0
-
-        for i, text in enumerate(texts):
-            # Here token count is only an approximation based on the GPT2 tokenizer
-            # TODO: Optimize for better token estimation and chunking
-            num_tokens = self._get_num_tokens_by_gpt2(text)
-
-            if num_tokens >= context_size:
-                cutoff = int(len(text) * (np.floor(context_size / num_tokens)))
-                # if num tokens is larger than context length, only use the start
-                inputs.append(text[0:cutoff])
-            else:
-                inputs.append(text)
-            indices += [i]
-
-        batched_embeddings = []
-        _iter = range(0, len(inputs), max_chunks)
-
-        for i in _iter:
-            # Prepare the payload for the request
-            payload = {"input": inputs[i : i + max_chunks], "model": model, **extra_model_kwargs}
-
-            # Make the request to the OpenAI API
-            response = requests.post(endpoint_url, headers=headers, data=json.dumps(payload), timeout=(10, 300))
-
-            response.raise_for_status()  # Raise an exception for HTTP errors
-            response_data = response.json()
-
-            # Extract embeddings and used tokens from the response
-            embeddings_batch = [data["embedding"] for data in response_data["data"]]
-            embedding_used_tokens = response_data["usage"]["total_tokens"]
-
-            used_tokens += embedding_used_tokens
-            batched_embeddings += embeddings_batch
-
-        # calc usage
         usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
 
-        return TextEmbeddingResult(embeddings=batched_embeddings, usage=usage, model=model)
+        return TextEmbeddingResult(embeddings=response_data["embedding"], usage=usage, model=model)
 
     def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
         """
