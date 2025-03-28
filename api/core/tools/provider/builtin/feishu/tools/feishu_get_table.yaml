@@ -46,3 +46,23 @@ parameters:
       pt_BR: output format
     llm_description: output format
     form: form
+  - name: has_header
+    type: select
+    required: true
+    options:
+      - label:
+          en_US: "TRUE"
+        value: true
+      - label:
+          en_US: "FALSE"
+        value: false
+    label:
+      en_US: has header
+      zh_Hans: 是否有表头
+      pt_BR: has header
+    human_description:
+      en_US: has header
+      zh_Hans: 是否有表头
+      pt_BR: has header
+    llm_description: has header
+    form: form

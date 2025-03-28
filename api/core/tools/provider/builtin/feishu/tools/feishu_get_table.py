@@ -1,7 +1,7 @@
 from typing import Any, Union
 
-import anyio
-from slark import AsyncLark
+from loguru import logger
+from slark import Lark
 
 from core.tools.entities.tool_entities import ToolInvokeMessage
 from core.tools.tool.builtin_tool import BuiltinTool
@@ -15,12 +15,16 @@ class FeishuGetTableTool(BuiltinTool):
         if not table_url:
             return self.create_text_message("Invalid parameter table_url")
         output_format = tool_parameters.get("output_format", "markdown")
+        has_header = tool_parameters.get("has_header", "true").lower() == "true"
         credentials = self.runtime.credentials
+
+        logger.info(
+            f"Getting table from {table_url}, output_format={output_format}"
+            f", has_header={has_header}, type(has_header)={type(has_header)}"
+        )
         try:
-            lark = AsyncLark(app_id=credentials["app_id"], app_secret=credentials["app_secret"])
-            async def read_table(url: str, has_header: bool = True):
-                return await lark.sheets.read(url, has_header=has_header)
-            df = anyio.run(read_table, table_url)
+            lark = Lark(app_id=credentials["app_id"], app_secret=credentials["app_secret"])
+            df = lark.sheets.read(table_url, has_header=has_header)
 
             if output_format == "csv":
                 ret = df.to_csv(index=False)
