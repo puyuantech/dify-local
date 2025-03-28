@@ -102,6 +102,8 @@ zhipuai = "~2.1.5"
 # Related transparent dependencies with pinned version
 # required by main implementations
 ############################################################
+puyuan-modelhub = ">=3.0.0,<3.1.0"
+nest-asyncio = "^1.6.0"
 [tool.poetry.group.indirect.dependencies]
 kaleido = "0.2.1"
 rank-bm25 = "~0.2.2"
