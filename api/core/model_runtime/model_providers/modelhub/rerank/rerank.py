@@ -1,7 +1,7 @@
 from typing import Optional
 
 import numpy as np
-from modelhub import ModelhubClient
+from modelhub import Modelhub
 
 from core.model_runtime.entities.rerank_entities import RerankDocument, RerankResult
 from core.model_runtime.errors.invoke import (
@@ -42,12 +42,12 @@ class CohereRerankModel(RerankModel):
             return RerankResult(model=model, docs=docs)
 
         user_name, user_password = credentials["api_key"].split(":")
-        client = ModelhubClient(
-            user_name=user_name,
-            user_password=user_password,
+        client = Modelhub(
+            username=user_name,
+            password=user_password,
             host=credentials["endpoint_url"].replace("v1", ""),
         )
-        scores = client.cross_embedding(
+        scores = client.rerank(
             [[query, doc] for doc in docs],
             model=model,
         ).scores

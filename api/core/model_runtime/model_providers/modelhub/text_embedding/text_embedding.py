@@ -1,10 +1,8 @@
-import json
 import time
 from decimal import Decimal
-from typing import Optional, Dict, Any
-from urllib.parse import urljoin
+from typing import Optional
 
-import requests
+from modelhub import Modelhub
 
 from core.entities.embedding_type import EmbeddingInputType
 from core.model_runtime.entities.common_entities import I18nObject
@@ -17,7 +15,8 @@ from core.model_runtime.entities.model_entities import (
     PriceType,
 )
 from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, TextEmbeddingResult
-from core.model_runtime.errors.validate import CredentialsValidateFailedError
+
+# from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
 from core.model_runtime.model_providers.modelhub._common import _CommonOAI_API_Compat
 
@@ -45,35 +44,18 @@ class ModelHubEmbeddingModel(_CommonOAI_API_Compat, TextEmbeddingModel):
         :return: embeddings result
         """
 
-        # Prepare headers and payload for the request
-        headers = {"Content-Type": "application/json"}
-
-        api_key = credentials.get("api_key")
-        if api_key:
-            headers["Authorization"] = f"Bearer {api_key}"
-
-        endpoint_url = credentials.get("endpoint_url")
-        if not endpoint_url.endswith("/"):
-            endpoint_url += "/"
-
-        endpoint_url = endpoint_url.replace("v1/", "")
-
-        endpoint_url = urljoin(endpoint_url, "embedding")
-
-        payload: Dict[str, Any] = {"content": texts, "model": model, }
-
-        if user:
-            payload["user"] = user
-
-        response = requests.post(endpoint_url, headers=headers, json=payload, timeout=(10, 300))
-        response.raise_for_status()
-        response_data = response.json()
-
-        used_tokens = response_data.get("cost", {}).get("total_tokens", 0)
+        user_name, user_password = credentials["api_key"].split(":")
+        client = Modelhub(
+            username=user_name,
+            password=user_password,
+            host=credentials["endpoint_url"].replace("v1", ""),
+        )
+        out = client.embedding(content=texts, model=model)
+        used_tokens = out.cost.prompt_tokens if out.cost else 0
 
         usage = self._calc_response_usage(model=model, credentials=credentials, tokens=used_tokens)
 
-        return TextEmbeddingResult(embeddings=response_data["embedding"], usage=usage, model=model)
+        return TextEmbeddingResult(embeddings=out.embedding, usage=usage, model=model)
 
     def get_num_tokens(self, model: str, credentials: dict, texts: list[str]) -> int:
         """
@@ -94,40 +76,7 @@ class ModelHubEmbeddingModel(_CommonOAI_API_Compat, TextEmbeddingModel):
         :param credentials: model credentials
         :return:
         """
-        try:
-            headers = {"Content-Type": "application/json"}
-
-            api_key = credentials.get("api_key")
-
-            if api_key:
-                headers["Authorization"] = f"Bearer {api_key}"
-
-            endpoint_url = credentials.get("endpoint_url")
-            if not endpoint_url.endswith("/"):
-                endpoint_url += "/"
-
-            endpoint_url = urljoin(endpoint_url, "embeddings")
-
-            payload = {"input": "ping", "model": model}
-
-            response = requests.post(url=endpoint_url, headers=headers, data=json.dumps(payload), timeout=(10, 300))
-
-            if response.status_code != 200:
-                raise CredentialsValidateFailedError(
-                    f"Credentials validation failed with status code {response.status_code}"
-                )
-
-            try:
-                json_result = response.json()
-            except json.JSONDecodeError as e:
-                raise CredentialsValidateFailedError("Credentials validation failed: JSON decode error")
-
-            if "model" not in json_result:
-                raise CredentialsValidateFailedError("Credentials validation failed: invalid response")
-        except CredentialsValidateFailedError:
-            raise
-        except Exception as ex:
-            raise CredentialsValidateFailedError(str(ex))
+        return True
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> AIModelEntity:
         """
