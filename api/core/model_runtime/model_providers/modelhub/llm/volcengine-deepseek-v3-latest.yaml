@@ -1,7 +1,7 @@
-model: volcengine/deepseek-v3-241226
+model: volcengine/deepseek-v3-latest
 label:
-  zh_Hans: volcengine/deepseek-v3-241226
-  en_US: volcengine/deepseek-v3-241226
+  zh_Hans: volcengine/deepseek-v3-latest
+  en_US: volcengine/deepseek-v3-latest
 model_type: llm
 features:
   - multi-tool-call
