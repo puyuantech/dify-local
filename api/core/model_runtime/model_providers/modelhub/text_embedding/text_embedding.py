@@ -18,10 +18,10 @@ from core.model_runtime.entities.text_embedding_entities import EmbeddingUsage, 
 
 # from core.model_runtime.errors.validate import CredentialsValidateFailedError
 from core.model_runtime.model_providers.__base.text_embedding_model import TextEmbeddingModel
-from core.model_runtime.model_providers.modelhub._common import _CommonOAI_API_Compat
+from core.model_runtime.model_providers.modelhub._common import _CommonOaiApiCompat
 
 
-class ModelHubEmbeddingModel(_CommonOAI_API_Compat, TextEmbeddingModel):
+class ModelHubEmbeddingModel(_CommonOaiApiCompat, TextEmbeddingModel):
     """
     Model class for an OpenAI API-compatible text embedding model.
     """
