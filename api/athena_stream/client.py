@@ -1,3 +1,4 @@
+import json
 import os
 from ._client import SyncAPIClient
 from .types.chat import ChatResponse, MessageType
@@ -17,23 +18,25 @@ class AthenaClient:
         query: str,
         history: list[dict] = None,
         kb_ids: list[str] = None,
-        verbose: int = 0,
+        verbose: int = 2,
         is_multiple_project_query: bool = False,
         is_qa_query: bool = True,
     ):
         history = history or []
         kb_ids = kb_ids or []
+        body_data = {
+            "app_id": app_id,
+            "query": query,
+            "history": history,
+            "kb_ids": kb_ids,
+            "verbose": verbose,
+            "is_multiple_project_query": is_multiple_project_query,
+            "is_qa_query": is_qa_query,
+        }
+        print(f"Calling athena with params: {json.dumps(body_data, indent=2)}")
         return self.client.stream(
             "/knowledge/chat",
-            body={
-                "app_id": app_id,
-                "query": query,
-                "history": history,
-                "kb_ids": kb_ids,
-                "verbose": verbose,
-                "is_multiple_project_query": is_multiple_project_query,
-                "is_qa_query": is_qa_query,
-            },
+            body=body_data,
             cast_to=ChatResponse,
             options={"stream_prefix": ""},
         )
