@@ -124,7 +124,7 @@ class ModelhubLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
             # prepare the payload for a simple ping to the model
             data = {"model": model, "max_tokens": 5}
 
-            completion_type = LLMMode.value_of(credentials["mode"])
+            completion_type = LLMMode.value_of(credentials.get("mode", "chat"))
 
             if completion_type is LLMMode.CHAT:
                 data["messages"] = [
@@ -279,9 +279,9 @@ class ModelhubLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
             ),
         )
 
-        if credentials["mode"] == "chat":
+        if credentials.get("mode", "chat") == "chat":
             entity.model_properties[ModelPropertyKey.MODE] = LLMMode.CHAT.value
-        elif credentials["mode"] == "completion":
+        elif credentials.get("mode", "chat") == "completion":
             entity.model_properties[ModelPropertyKey.MODE] = LLMMode.COMPLETION.value
         else:
             raise ValueError(f"Unknown completion type {credentials['completion_type']}")
@@ -351,7 +351,9 @@ class ModelhubLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
 
         data = {"model": model, "stream": stream, **model_parameters}
 
-        completion_type = LLMMode.value_of(credentials["mode"])
+        # raise Exception(str(credentials))
+
+        completion_type = LLMMode.value_of(credentials.get("mode", "chat"))
 
         if completion_type is LLMMode.CHAT:
             endpoint_url = urljoin(endpoint_url, "chat/completions")
@@ -594,7 +596,7 @@ class ModelhubLargeLanguageModel(_CommonOaiApiCompat, LargeLanguageModel):
     ) -> LLMResult:
         response_json: dict = response.json()
 
-        completion_type = LLMMode.value_of(credentials["mode"])
+        completion_type = LLMMode.value_of(credentials.get("mode", "chat"))
 
         output = response_json["choices"][0]
         message_id = response_json.get("id")
